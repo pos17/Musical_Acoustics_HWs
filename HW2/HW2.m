@@ -78,7 +78,7 @@ for i = 1:modes
 end
 
 x = zeros(2, modes);
-phi = [15, 195];
+% phi = [15, 195];
 radius = 0.075;
 
 for nn = 1:2
@@ -88,7 +88,13 @@ for nn = 1:2
         kn = freqs(i)*2*pi/c;
         Jm = besselj(m, kn*r);
         Jm = Jm(r==radius);
-        x(nn, i) = exp(1j*m*(phi(nn)*2*pi/360))*Jm;
+        if m~=0
+            angle = pi/m + (nn-1)*pi;
+            x(nn, i) = exp(1j*m*(angle*2*pi/360))*Jm;
+        else
+            angle = (nn-1)*pi;
+            x(nn, i) = exp(1j*m*(angle*2*pi/360))*Jm;
+        end
     end
 end
 
@@ -119,12 +125,11 @@ plot(f, abs(force_omega));
 % displacement = force_omega.*mob;
 displacement = force_omega.*H21;
 
-close all
+% close all
 figure
 plot(f, abs(displacement));
 
 
-%%
 dsp = ifft(displacement, len);
 
 % close all
