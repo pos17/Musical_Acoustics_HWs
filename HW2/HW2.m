@@ -186,7 +186,7 @@ figure
 semilogx(f, v_f, LineWidth=1.2)
 grid minor
 
-%% f)
+%% f) modal frequencies of the five bending modes of the plate
 
 close all;
 
@@ -211,3 +211,27 @@ end
 for i=1:length(plate_facs.values)
     disp(['freq: ', num2str(plate_freqs(i)), ', mn: ', num2str(cell2mat(plate_facs.idx(i)))] )
 end
+
+%% Part 3) 
+rho_vol_str = 5000; %[kg/m^3]
+a_str = 0.001;
+sur_str = a_str^2 * pi;
+L_str = 0.4; %[m]
+%% g)
+
+string_freq = plate_freqs(1)
+c = (2*string_freq)* L_str
+rho_str = rho_vol_str * sur_str
+T_str = c^2 * rho_str
+
+%% h)
+
+E_str = 200e+9;  %[Pa]
+freqs_modes = zeros(5,1);
+K_str = a_str/2;
+B_str = (pi*E_str*sur_str*K_str^2)/(T_str*L_str^2);
+for nn=1:length(freqs_modes)
+    freqs_modes(nn)= nn* string_freq * sqrt(1+B_str*nn^2)*(1+(2/pi)*(B_str^(1/2))+(4/pi^2)*B_str);
+end
+
+% fn = nf ◦1√1 + Bn2[1 + 2/πB0.5 + (4/π2)B].
