@@ -64,18 +64,39 @@ f = linspace(1,200, 2000);
 omega = 2*pi*f;
 Q = 25;
 modes = 18;
+graphmodes = 5;
 
 close all
-figure
+% figure
 H = zeros(18, length(f));
 
+figure('Renderer', 'painters', 'Position', [10 10 1200 800])
+
 for i = 1:modes
-    omega0i = (2*pi*freqs(i));
-    H(i, :) = 1./(-omega.^2 + 1j*omega*omega0i/Q + omega0i^2);
-    
-    subplot(modes,modes, sub2ind([modes,modes], i,i));
-    plot(f, abs(H(i,:)));
+    for j = 1:modes
+        omega0i = (2*pi*freqs(i));
+        H(i, :) = 1./(-omega.^2 + 1j*omega*omega0i/Q + omega0i^2);
+        if(j==i && (i==1 || i==2 || i==3 || i==modes))
+            idx = i;
+            if(i==modes) 
+                idx=graphmodes;
+            end
+            subplot(graphmodes, graphmodes, sub2ind([graphmodes, graphmodes], idx, idx));
+            plot(f, abs(H(i,:)));
+            grid minor
+            title(['mode', num2str(i)])
+        end
+    end
 end
+subplot(graphmodes, graphmodes, sub2ind([graphmodes, graphmodes], graphmodes, 1));
+plot(f, zeros(1, length(f)));
+grid minor
+subplot(graphmodes, graphmodes, sub2ind([graphmodes, graphmodes], 1, graphmodes));
+plot(f, zeros(1, length(f)));
+grid minor
+
+
+close all
 
 x = zeros(2, modes);
 % phi = [15, 195];
@@ -109,8 +130,10 @@ for ii = 1:length(f)
 end
 
 figure
-plot(f, abs(mob), LineWidth=1.2)
+plot(f, abs(H21), LineWidth=1.2, LineWidth=1.2);
 grid minor
+
+
 
 len = 2*length(f);
 t = linspace(0, 50, len);
@@ -120,23 +143,26 @@ force_omega = force_omega(1:len/2);
 
 % close all
 figure
-plot(f, abs(force_omega));
+plot(f, abs(force_omega), LineWidth=1.2);
+grid minor
 
 % displacement = force_omega.*mob;
 displacement = force_omega.*H21;
 
 % close all
 figure
-plot(f, abs(displacement));
+plot(f, abs(displacement), LineWidth=1.2);
+grid minor
 
 
 dsp = ifft(displacement, len);
 
 % close all
 figure
-plot(t, real(dsp))
-xlim([0, 9])
+plot(t, real(dsp), LineWidth=1.2);
 grid minor
+xlim([0, 9])
+
 
 
 
