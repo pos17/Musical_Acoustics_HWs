@@ -141,11 +141,47 @@ grid minor
 
 
 %% Part 2) 
-E = 69e+9 %[Pa]
-rho = 2700 %[kg/m^3]
-v= 0.334
-%% d)
+E = 69e+9;  %[Pa]
+rho = 2700; %[kg/m^3]
+v= 0.334;
+h = 0.001;   %[m]
+f = linspace(20,20000, 20000);
+%% d) Propagation speed for quasi-longitudinal and longitudinal waves
 
-c_L = 5
+c_L = sqrt(E/(rho*(1-v^2)))
+c_LL = sqrt(E*(1-v)/(rho*(1+v)*(1-2*v)))
 
+%% e) Propagation speed for bending waves
+close all;
+ 
+v_f = sqrt(1.8*f*h*c_L);
 
+figure
+semilogx(f, v_f, LineWidth=1.2)
+grid minor
+
+%% f)
+
+close all;
+
+plate_facs.values = [
+    0.4694, 2.08, 3.41, 5.00, 6.82 ,...
+    3.89, 5.95, 8.28, 10.87, 13.71,...
+    8.72, 11.75, 15.06, 18.63, 22.47
+    ];
+
+plate_facs.idx = {
+    [0,1],[1,1],[2,1],[3,1],[4,1], ...
+    [0,2],[1,2],[2,2],[3,2],[4,2], ...
+    [0,3],[1,3],[2,3],[3,3],[4,3]};
+
+plate_freqs = zeros(18, 1);
+plate_freqs(1) = plate_facs.values(1) * c_L * h / a^2;
+for i=2:length(plate_facs.values)
+    plate_freqs(i) = plate_facs.values(i)*plate_freqs(1);
+    %disp(['freq: ', num2str(plate_freqs(i)), ', mn: ', num2str(cell2mat(plate_facs.idx(i)))] )
+end
+
+for i=1:length(plate_facs.values)
+    disp(['freq: ', num2str(plate_freqs(i)), ', mn: ', num2str(cell2mat(plate_facs.idx(i)))] )
+end
