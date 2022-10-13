@@ -43,8 +43,8 @@ r = linspace(0, a, 101);
 
 close all
 figure('Renderer', 'painters', 'Position', [10 10 1200 800])
-for i=1:6
-    subplot(2,3, i)
+for i=1:18
+    subplot(3,6, i)
     idx = cell2mat(J.idx(i));
     m = idx(1);
     kn = freqs(i)*2*pi/c;
@@ -59,23 +59,27 @@ end
 sgtitle("First six modes of resonance")
 
 %% PART 1- c 2
-Fs = 44100;
+Fs = 48000;
 T = 1/Fs;
 t_time = 2;
-L = t_time*44100; 
-t = (0:L-1)*T;  
+L = t_time*Fs; % number of samples
+t = linspace(0, t_time, L);  
 
 %f = linspace(1,200, 2000);
 %len = length(f);
 %t = linspace(0, 50, len);
 force = 0.1*exp(-(t-0.03).^2/0.01^2);
 force_omega = fft(force);
-P2 = abs(force_omega/L);
-P1 = P2(1:L/2+1);
+%P2 = abs(force_omega/L);
+P2 = force_omega/L;
+P1 = P2(1:L/2);
 P1(2:end-1) = 2*P1(2:end-1);
 
+
 %force_omega = force_omega(1:len/2);
-f = Fs*(0:(L/2))/L;
+%f = Fs*(0:(L/2))/L;
+Fn = Fs/2; % Nyquist frequency
+f = linspace(0, Fn, L/2);
 % close all
 figure;
 plot(1000*t,force)
@@ -98,7 +102,7 @@ Q = 25;
 modes = 18;
 graphmodes = 5;
 
-%close all
+close all
 % figure
 H = zeros(18, length(f));
 
@@ -117,15 +121,18 @@ for i = 1:modes
             plot(f, abs(H(i,:)));
             grid minor
             title(['mode', num2str(i)])
+        xlim([0, 200])
         end
     end
 end
 subplot(graphmodes, graphmodes, sub2ind([graphmodes, graphmodes], graphmodes, 1));
 plot(f, zeros(1, length(f)));
 grid minor
+xlim([0, 200])
 subplot(graphmodes, graphmodes, sub2ind([graphmodes, graphmodes], 1, graphmodes));
 plot(f, zeros(1, length(f)));
 grid minor
+xlim([0, 200])
 
 x = zeros(2, modes);
 % phi = [15, 195];
@@ -136,8 +143,9 @@ for nn = 1:2
         idx = cell2mat(J.idx(i));
         m = idx(1);
         kn = freqs(i)*2*pi/c;
-        Jm = besselj(m, kn*r);
-        Jm = Jm(r==radius);
+        %Jm = besselj(m, kn*r);
+        %Jm = Jm(r==radius);
+        Jm =  besselj(m, kn*radius);
         if m~=0
             angle = pi/m + (nn-1)*pi;
             x(nn, i) = exp(1j*m*(angle*2*pi/360))*Jm;
@@ -152,9 +160,9 @@ H21 = zeros(1,length(f));
 mob = zeros(1,length(f));
 
 for ii = 1:length(f)
-    zer = zeros(1, 200);
+    % zer = zeros(1, 200);
     H_tmp = diag(H(:,ii));
-    H21(ii) = x(1,:)*H_tmp*x(2,:)';
+    H21(ii) = x(1,:) * H_tmp * x(2,:)';
     mob(ii) = 1j*2*pi*f(ii)*H21(ii);
 end
 
@@ -191,15 +199,18 @@ grid minor
 %grid minor
 
 
-displacement = displacement(1:end-1);
-dsp = ifft(displacement);
+% displacement = displacement(1:end-1);
+dsp = ifft(displacement, L);
+dsp = dsp*L;
 
 % close all
 figure
-t2 = t(1:length(t)/2)
-plot(t2, real(dsp), LineWidth=1.2);
+t2 = t(1:length(t)/2);
+plot(t, real(dsp), LineWidth=1.2);
+hold on
+plot(t, force*3e-5, LineWidth=1.2);
 grid minor
-xlim([0, 9])
+xlim([0, 1])
 
 
 
@@ -315,6 +326,8 @@ grid minor
 xlim([0, 4])
 title('z(t)')
 
+%%
+sound(real(dsp)/max(real(dsp)),Fs)
 
 
 
