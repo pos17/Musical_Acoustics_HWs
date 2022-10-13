@@ -2,6 +2,7 @@
 
 clc; close all; clear;
 
+addpath(genpath('HW2'))
 T = 10; % N/m
 a = 0.15; % m
 sigma = 0.07; % kg/m^2
@@ -205,7 +206,7 @@ xlim([0, 9])
 
 %% PART 1- c
 
-f = linspace(1,200, 2000);
+f = linspace(1,200, 4000);
 omega = 2*pi*f;
 Q = 25;
 modes = 18;
@@ -277,6 +278,7 @@ end
 figure
 plot(f, abs(H21), LineWidth=1.2, LineWidth=1.2);
 grid minor
+title('Module of FRF_{2,1}', Interpreter='tex');
 
 
 
@@ -290,6 +292,7 @@ force_omega = force_omega(1:len/2);
 figure
 plot(f, abs(force_omega), LineWidth=1.2);
 grid minor
+title('F(\omega)', Interpreter='tex')
 
 % displacement = force_omega.*mob;
 displacement = force_omega.*H21;
@@ -298,6 +301,7 @@ displacement = force_omega.*H21;
 figure
 plot(f, abs(displacement), LineWidth=1.2);
 grid minor
+title('Z(\omega)', Interpreter='tex')
 
 
 dsp = ifft(displacement, len);
@@ -305,7 +309,13 @@ dsp = ifft(displacement, len);
 % close all
 figure
 plot(t, real(dsp), LineWidth=1.2);
+% hold on
+% plot(t, -force*1e-5, LineWidth=1.2);
 grid minor
+xlim([0, 4])
+title('z(t)')
+
+
 
 
 %% Part 2) 
