@@ -57,6 +57,151 @@ for i=1:6
 end
 sgtitle("First six modes of resonance")
 
+%% PART 1- c 2
+Fs = 44100;
+T = 1/Fs;
+t_time = 2;
+L = t_time*44100; 
+t = (0:L-1)*T;  
+
+%f = linspace(1,200, 2000);
+%len = length(f);
+%t = linspace(0, 50, len);
+force = 0.1*exp(-(t-0.03).^2/0.01^2);
+force_omega = fft(force);
+P2 = abs(force_omega/L);
+P1 = P2(1:L/2+1);
+P1(2:end-1) = 2*P1(2:end-1);
+
+%force_omega = force_omega(1:len/2);
+f = Fs*(0:(L/2))/L;
+% close all
+figure;
+plot(1000*t,force)
+title('Signal Corrupted with Zero-Mean Random Noise')
+xlabel('t (milliseconds)')
+ylabel('X(t)')
+
+
+figure
+plot(f, abs(P1), LineWidth=1.2);
+xlim([0,500]);
+
+grid minor
+
+
+
+%f = linspace(1,200, 2000);
+omega = 2*pi*f;
+Q = 25;
+modes = 18;
+graphmodes = 5;
+
+%close all
+% figure
+H = zeros(18, length(f));
+
+figure('Renderer', 'painters', 'Position', [10 10 1200 800])
+
+for i = 1:modes
+    for j = 1:modes
+        omega0i = (2*pi*freqs(i));
+        H(i, :) = 1./(-omega.^2 + 1j*omega*omega0i/Q + omega0i^2);
+        if(j==i && (i==1 || i==2 || i==3 || i==modes))
+            idx = i;
+            if(i==modes) 
+                idx=graphmodes;
+            end
+            subplot(graphmodes, graphmodes, sub2ind([graphmodes, graphmodes], idx, idx));
+            plot(f, abs(H(i,:)));
+            grid minor
+            title(['mode', num2str(i)])
+        end
+    end
+end
+subplot(graphmodes, graphmodes, sub2ind([graphmodes, graphmodes], graphmodes, 1));
+plot(f, zeros(1, length(f)));
+grid minor
+subplot(graphmodes, graphmodes, sub2ind([graphmodes, graphmodes], 1, graphmodes));
+plot(f, zeros(1, length(f)));
+grid minor
+
+x = zeros(2, modes);
+% phi = [15, 195];
+radius = 0.075;
+
+for nn = 1:2
+    for i=1:modes
+        idx = cell2mat(J.idx(i));
+        m = idx(1);
+        kn = freqs(i)*2*pi/c;
+        Jm = besselj(m, kn*r);
+        Jm = Jm(r==radius);
+        if m~=0
+            angle = pi/m + (nn-1)*pi;
+            x(nn, i) = exp(1j*m*(angle*2*pi/360))*Jm;
+        else
+            angle = (nn-1)*pi;
+            x(nn, i) = exp(1j*m*(angle*2*pi/360))*Jm;
+        end
+    end
+end
+
+H21 = zeros(1,length(f));
+mob = zeros(1,length(f));
+
+for ii = 1:length(f)
+    zer = zeros(1, 200);
+    H_tmp = diag(H(:,ii));
+    H21(ii) = x(1,:)*H_tmp*x(2,:)';
+    mob(ii) = 1j*2*pi*f(ii)*H21(ii);
+end
+
+figure
+plot(f, abs(H21), LineWidth=1.2, LineWidth=1.2);
+title("H21 2")
+xlim([0,200])
+grid minor
+
+
+
+%len = 2*length(f);
+%t = linspace(0, 50, len);
+%force = 0.1*exp(-(t-0.03).^2/0.01^2);
+%force_omega = fft(force);
+%force_omega = force_omega(1:len/2);
+
+% close all
+%figure
+%plot(f, abs(force_omega), LineWidth=1.2);
+%grid minor
+
+% displacement = force_omega.*mob;
+displacement = P1.*H21;
+
+figure
+plot(f, abs(displacement), LineWidth=1.2, LineWidth=1.2);
+title("H21")
+xlim([0,300])
+grid minor
+% close all
+%figure
+%plot(f, abs(displacement), LineWidth=1.2);
+%grid minor
+
+
+displacement = displacement(1:end-1);
+dsp = ifft(displacement);
+
+% close all
+figure
+t2 = t(1:length(t)/2)
+plot(t2, real(dsp), LineWidth=1.2);
+grid minor
+xlim([0, 9])
+
+
+
 
 %% PART 1- c
 
@@ -161,9 +306,6 @@ dsp = ifft(displacement, len);
 figure
 plot(t, real(dsp), LineWidth=1.2);
 grid minor
-xlim([0, 9])
-
-
 
 
 %% Part 2) 
@@ -211,7 +353,7 @@ end
 for i=1:length(plate_facs.values)
     disp(['freq: ', num2str(plate_freqs(i)), ', mn: ', num2str(cell2mat(plate_facs.idx(i)))] )
 end
-
+plate_freqs2 = plate_freqs(1:5);
 %% Part 3) 
 rho_vol_str = 5000; %[kg/m^3]
 a_str = 0.001;
@@ -221,17 +363,37 @@ L_str = 0.4; %[m]
 
 string_freq = plate_freqs(1)
 c = (2*string_freq)* L_str
-rho_str = rho_vol_str * sur_str
-T_str = c^2 * rho_str
+mu_str = rho_vol_str * sur_str
+T_str = c^2 * mu_str
 
-%% h)
+%% h) frequencies of the first five modes of the string with clamped edges 
 
 E_str = 200e+9;  %[Pa]
-freqs_modes = zeros(5,1);
+freqs_modes_clamped = zeros(5,1);
 K_str = a_str/2;
 B_str = (pi*E_str*sur_str*K_str^2)/(T_str*L_str^2);
-for nn=1:length(freqs_modes)
-    freqs_modes(nn)= nn* string_freq * sqrt(1+B_str*nn^2)*(1+(2/pi)*(B_str^(1/2))+(4/pi^2)*B_str);
+for nn=1:length(freqs_modes_clamped)
+    freqs_modes_clamped(nn)= nn* string_freq * sqrt(1+B_str*nn^2)*(1+(2/pi)*(B_str^(1/2))+(4/pi^2)*B_str);
 end
 
 % fn = nf ◦1√1 + Bn2[1 + 2/πB0.5 + (4/π2)B].
+
+%% h) frequencies of the first five modes of the string with supported edges 
+E_str = 200e+9;  %[Pa]
+freqs_modes_supported = zeros(5,1);
+K_str = a_str/2;
+B_str = (pi*E_str*sur_str*K_str^2)/(T_str*L_str^2);
+for nn=1:length(freqs_modes_supported)
+    freqs_modes_supported(nn)= nn* string_freq * sqrt(1+B_str*nn^2);
+end
+
+
+%% i) 
+m_str = L_str* mu_str;
+plate_string_freqs = zeros(5,3);
+plate_string_freqs(:,1) = plate_freqs2;
+plate_string_freqs(:,2) = freqs_modes_supported;
+plate_string_freqs(:,3) = freqs_modes_clamped;
+%m_str/()
+
+% m/(n2M) < π2/(4Q2B),
