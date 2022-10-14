@@ -60,7 +60,7 @@ sgtitle("First six modes of resonance")
 
 %% PART 1- c 2
 close all
-Fs = 24000;
+Fs = 48000;
 T = 1/Fs;
 t_time = 2;
 L = t_time*Fs; % number of samples
@@ -124,13 +124,13 @@ for nn = 1:2
     end
 end
 
-H21 = zeros(1,length(f));
-mob = zeros(1,length(f));
+H21 = zeros(1,length(f1));
+mob = zeros(1,length(f1));
 
-for ii = 1:length(f)
+for ii = 1:length(f1)
     % zer = zeros(1, 200);
     H_tmp = diag(H(:,ii));
-    H21(ii) = x(1,:) * H_tmp * x(2,:)' / L;
+    H21(ii) = x(1,:) * H_tmp * x(2,:)';
     mob(ii) = 1j*2*pi*f(ii)*H21(ii);
 end
 
@@ -162,10 +162,12 @@ plot(t, dsp2, t, force, LineWidth=1.2);
 hold on
 grid minor
 title('disp(t)')
-xlim([0, 1])
+% xlim([0, 0.75])
 
-%% SOUND OF MEMBRANE
+%%
 sound(dsp2/max(dsp2), Fs);
+
+
 
 %% PART 1 - c3 (mobility method) 
 
