@@ -3,13 +3,15 @@
 clc; close all; clear;
 
 addpath(genpath('HW2'))
-T = 10; % N/m
+T = 10; % N/mc 
+
 a = 0.15; % m
 sigma = 0.07; % kg/m^2
 
 %% PART 1 - a
 
-c = sqrt(T/sigma);
+c = sqrt(T/sigma);     
+
 
 %% PART 1-b
 
@@ -337,6 +339,7 @@ rho = 2700; %[kg/m^3]
 v= 0.334;
 h = 0.001;   %[m]
 f = linspace(20,20000, 20000);
+M_plate = rho*h*pi*a^2;
 %% d) Propagation speed for quasi-longitudinal and longitudinal waves
 
 c_L = sqrt(E/(rho*(1-v^2)))
@@ -366,13 +369,15 @@ plate_facs.idx = {
     [0,2],[1,2],[2,2],[3,2],[4,2], ...
     [0,3],[1,3],[2,3],[3,3],[4,3]};
 
-plate_freqs = zeros(18, 1);
-plate_freqs(1) = plate_facs.values(1) * c_L * h / a^2;
+plate_freqs = zeros(15, 1);
+plate_freqs(1,1) = plate_facs.values(1) * c_L * h / a^2;
+
 for i=2:length(plate_facs.values)
     plate_freqs(i) = plate_facs.values(i)*plate_freqs(1);
+    %plate_freqs(i,2) = i;
     %disp(['freq: ', num2str(plate_freqs(i)), ', mn: ', num2str(cell2mat(plate_facs.idx(i)))] )
 end
-
+[plate_freqs,plate_order] = sort(plate_freqs);
 for i=1:length(plate_facs.values)
     disp(['freq: ', num2str(plate_freqs(i)), ', mn: ', num2str(cell2mat(plate_facs.idx(i)))] )
 end
@@ -385,9 +390,9 @@ L_str = 0.4; %[m]
 %% g)
 
 string_freq = plate_freqs(1)
-c = (2*string_freq)* L_str
+c_str = (2*string_freq)* L_str
 mu_str = rho_vol_str * sur_str
-T_str = c^2 * mu_str
+T_str = c_str^2 * mu_str
 
 %% h) frequencies of the first five modes of the string with clamped edges 
 
@@ -412,11 +417,62 @@ end
 
 
 %% i) 
+Q_b = 50;
+numOfHarms = 5;
+string_freqs_noDamp = zeros(numOfHarms,1);
+for nn = 1:numOfHarms 
+   string_freqs_noDamp(nn) = (nn*c_str*pi)/(2*pi*L_str);
+end 
+
 m_str = L_str* mu_str;
-plate_string_freqs = zeros(5,3);
+plate_string_freqs = zeros(5,4);
 plate_string_freqs(:,1) = plate_freqs2;
 plate_string_freqs(:,2) = freqs_modes_supported;
 plate_string_freqs(:,3) = freqs_modes_clamped;
-%m_str/()
+plate_string_freqs(:,4) = string_freqs_noDamp;
+plate_freqs2 = round(plate_freqs2,4)
+string_freqs_noDamp = round(string_freqs_noDamp,4)
+
+% first column: plate resonance frequencies
+% second column: string not stiff resonance frequencies
+% third column: 0 weak coupling, 1 strong coupling with same frequency case
+
+% fourth column: m/n^2*M * 10^3
+% fifth column: delta frequencies;
+% sixth column: first splitted freq, omega positive;
+% seventh column: second splitted freq, omega negative;
+% eighth column: ws-wb/wb
+plate_string_coupling=zeros(5,8); 
+plate_string_coupling(:,1) = plate_freqs2;
+plate_string_coupling(:,2) = string_freqs_noDamp;
+for i= 1:length(string_freqs_noDamp)
+    if(string_freqs_noDamp(i)==plate_freqs2(i))
+        if(m_str*(4*Q_b^2)/(i^2*M_plate)>pi^2)
+            plate_string_coupling(i,3) = 1;   
+        end
+        
+    end
+    plate_string_coupling(i,4) = m_str/(i^2*M_plate)*10^3;
+end    
+
+% done by hand cause I don't have a fucking matlab curve
+plate_string_coupling(1,5) = 0.078;
+plate_string_coupling(5,5) = 0;
+for i= 1:length(string_freqs_noDamp)
+    if plate_string_coupling(i,5) ~= 0
+        plate_string_coupling(i,6) = (1+plate_string_coupling(i,5))...
+            *plate_string_coupling(i,2);
+        plate_string_coupling(i,7) = (1-plate_string_coupling(i,5))...
+            *plate_string_coupling(i,2);
+        
+    else
+        if plate_string_coupling(i,3) ~= 1
+            plate_string_coupling(i,8) = (plate_string_coupling(i,2)-plate_string_coupling(i,1))/plate_string_coupling(i,1);
+        end
+
+    end
+
+end   
+
 
 % m/(n2M) < π2/(4Q2B),
