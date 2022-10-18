@@ -442,16 +442,18 @@ string_freqs_noDamp = round(string_freqs_noDamp,4)
 % sixth column: first splitted freq, omega positive;
 % seventh column: second splitted freq, omega negative;
 % eighth column: ws-wb/wb
-plate_string_coupling=zeros(5,8); 
+% nineth column: ((omega+)-omega_b)/omega_b
+% tenth column: ((omega-)-omega_b)/omega_b
+plate_string_coupling=zeros(5,10); 
 plate_string_coupling(:,1) = plate_freqs2;
 plate_string_coupling(:,2) = string_freqs_noDamp;
 for i= 1:length(string_freqs_noDamp)
-    if(string_freqs_noDamp(i)==plate_freqs2(i))
+    %if(string_freqs_noDamp(i)==plate_freqs2(i))
         if(m_str*(4*Q_b^2)/(i^2*M_plate)>pi^2)
             plate_string_coupling(i,3) = 1;   
         end
         
-    end
+    %end
     plate_string_coupling(i,4) = m_str/(i^2*M_plate)*10^3;
 end    
 
@@ -460,19 +462,37 @@ plate_string_coupling(1,5) = 0.078;
 plate_string_coupling(5,5) = 0;
 for i= 1:length(string_freqs_noDamp)
     if plate_string_coupling(i,5) ~= 0
-        plate_string_coupling(i,6) = (1+plate_string_coupling(i,5))...
+        plate_string_coupling(i,6) = (1+plate_string_coupling(i,5)/2)...
             *plate_string_coupling(i,2);
-        plate_string_coupling(i,7) = (1-plate_string_coupling(i,5))...
+        plate_string_coupling(i,7) = (1-plate_string_coupling(i,5)/2)...
             *plate_string_coupling(i,2);
         
     else
-        if plate_string_coupling(i,3) ~= 1
+        %if plate_string_coupling(i,3) ~= 1
             plate_string_coupling(i,8) = (plate_string_coupling(i,2)-plate_string_coupling(i,1))/plate_string_coupling(i,1);
-        end
+            %end
 
     end
 
 end   
 
+plate_string_coupling(2,9) = 0.00907;
+plate_string_coupling(2,10) = -0.046;
+plate_string_coupling(3,9) = 0;
+plate_string_coupling(3,10) = -0.1202;
+plate_string_coupling(4,9) = 0.0379;
+plate_string_coupling(4,10) = -0.0104;
+
+plate_string_coupling(5,6) = plate_string_coupling(5,1);
+plate_string_coupling(5,7) = plate_string_coupling(5,1);
+
+
+for i=1:length(string_freqs_noDamp)
+    if plate_string_coupling(i,8) ~=0
+        plate_string_coupling(i,6) = (1+plate_string_coupling(i,9))*plate_string_coupling(i,1);
+        plate_string_coupling(i,7) = (1+plate_string_coupling(i,10))*plate_string_coupling(i,1);
+    end
+end
+plate_string_coupling_omega = plate_string_coupling*2*pi
 
 % m/(n2M) < π2/(4Q2B),
