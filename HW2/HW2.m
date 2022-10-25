@@ -44,9 +44,9 @@ theta = linspace(0, 2*pi, 101);
 r = linspace(0, a, 101);
 
 close all
-figure('Renderer', 'painters', 'Position', [10 10 1200 800])
-for i=1:18
-    subplot(3,6, i)
+figure('Renderer', 'painters', 'Position', [10 10 800 1200])
+for i=1:6
+    subplot(3,2, i)
     idx = cell2mat(J.idx(i));
     m = idx(1);
     kn = freqs(i)*2*pi/c;
@@ -56,30 +56,153 @@ for i=1:18
     view(2);
     colorbar
     grid minor
-    title(['f_{ ', num2str(idx), '}= ', num2str(freqs(i)), ' Hz'], Interpreter="tex")
+    title(['f_{ ', num2str(idx), '}= ', ...
+        num2str(freqs(i)), ' Hz'], Interpreter="tex", FontSize=14)
 end
-sgtitle("First six modes of resonance")
+sgtitle("First six modeshapes of resonance")
 
 %% PART 1- c 2
+close all
 Fs = 48000;
 T = 1/Fs;
 t_time = 2;
 L = t_time*Fs; % number of samples
+% NFFT = 2^(ceil(log2(L+L-1)));
+NFFT = L;
 t = linspace(0, t_time, L);  
 
-%f = linspace(1,200, 2000);
-%len = length(f);
-%t = linspace(0, 50, len);
 force = 0.1*exp(-(t-0.03).^2/0.01^2);
-force_omega = fft(force);
-%P2 = abs(force_omega/L);
-P2 = force_omega/L;
-P1 = P2(1:L/2);
-P1(2:end-1) = 2*P1(2:end-1);
+force_omega = fft(force, NFFT);
+P2 = force_omega/Fs;
+P1 = 2*P2(1:NFFT/2);
+% P1(2:end-1) = 2*P1(2:end-1);
 
+% Fn = Fs/2; % Nyquist frequency
+f = linspace(0, Fs, NFFT/2);
 
-%force_omega = force_omega(1:len/2);
-%f = Fs*(0:(L/2))/L;
+figure
+plot(f, abs(P1), LineWidth=1.2);
+grid minor
+xlim([0,200])
+title('force(\omega)')
+
+omega = 2*pi*f;
+Q = 25;
+modes = 18;
+
+H = zeros(18, length(f));
+
+modal_mass = zeros(18, 1);
+
+% MODAL FRM
+for i = 1:modes
+    
+        omega0i = (2*pi*freqs(i));
+        
+        % MODAL MASS
+        idx = cell2mat(J.idx(i));
+        mm = idx(1);
+        kk = freqs(i)*2*pi/c;
+        polar_func = @(phi, rr)  sigma * abs((exp(1j*mm*phi).*besselj(mm, kk*rr))).^2 .* rr ;
+        modal_mass(i) = integral2(polar_func, 0, 2*pi, 0, a);
+%         modal_mass = ones(18,1);
+
+        H(i, :) = (modal_mass(i))^-1 ./ (-omega.^2 + 1j*omega*omega0i/Q + omega0i^2);
+%         H(i, :) = 1 ./ (-omega.^2 + 1j*omega*omega0i/Q + omega0i^2);
+end
+
+x = zeros(2, modes);
+radius = 0.075;
+
+% EIGENMODES
+for nn = 1:2
+    for i=1:modes
+        idx = cell2mat(J.idx(i));
+        m = idx(1);
+        kn = freqs(i)*2*pi/c;
+        Jm =  besselj(m, kn*radius);
+        if m~=0
+            angle = pi/m + (nn-1)*pi;
+            x(nn, i) = exp(1j*m*(angle))*Jm;
+        else
+            angle = (nn-1)*pi;
+            x(nn, i) = exp(1j*m*(angle))*Jm;
+        end
+    end
+end
+
+H21 = zeros(1,length(f));
+mob = zeros(1,length(f));
+
+for ii = 1:length(f)
+    % zer = zeros(1, 200);
+    H_tmp = diag(H(:,ii));
+    H21(ii) = x(1,:) * H_tmp * x(2,:)' ;
+    mob(ii) = 1j*2*pi*f(ii)*H21(ii);
+end
+
+% H21 = ones(1,length(f1));
+
+figure('Renderer', 'painters', 'Position', [100 100 800 300])
+plot(f, abs(H21), LineWidth=1.2, LineWidth=1.2);
+title("Receptance")
+xlabel('freq [Hz]'); ylabel('|H_{21}(f)| [m/N]')
+xlim([0,200])
+grid minor
+
+% H21_total = [H21, flip(H21)];
+displacement = P1.*H21;
+
+figure
+plot(f, abs(displacement), LineWidth=1.2, LineWidth=1.2);
+title("displacement (\omega)")
+xlim([0,200])
+grid minor
+% close 
+
+dsp = Fs*ifft(displacement, NFFT);
+% dsp2 = [real(dsp(1, L/2)), zeros(1, L/2-1)];
+dsp2 = real(dsp);
+
+% close all
+figure('Renderer', 'painters', 'Position', [100 100 800 600])
+subplot 212
+plot(t, dsp2, LineWidth=1.3);
+hold on
+grid minor
+% legend('Displacement', 'Force*10^{-2}')
+title('x(t)')
+xlabel('t [s]'); ylabel('x(t) [m]')
+xlim([0, 1.5])
+
+subplot 211
+plot(f, abs(displacement), LineWidth=1.3);
+title("X (\omega)")
+xlim([0,200])
+xlabel('freq [Hz]')
+ylabel('|X(f)| [m\cdot s]')
+grid minor
+
+sgtitle('Displacement in measure point')
+%% SOUND OF MEMBRANE
+sound(dsp2/max(dsp2), Fs);
+%%
+audiowrite('membrana.wav', 0.9*dsp2/max(dsp2), Fs);
+
+%% PART 1 - c3 (mobility method) 
+
+Fs = 48000;
+t_time = 2;
+L = t_time*Fs; % number of samples
+t = linspace(0, t_time, L);  
+
+force = 0.1*exp(-(t-0.03).^2/0.01^2);
+% NFFT = 2^nextpow2(L/2);
+force_omega = fft(force)/Fs;
+P2 = force_omega;
+P1 = 2*P2(1:L/2);
+% P1(2:end-1) = 2*P1(2:end-1);
+
 Fn = Fs/2; % Nyquist frequency
 f = linspace(0, Fn, L/2);
 % close all
@@ -89,16 +212,13 @@ title('Signal Corrupted with Zero-Mean Random Noise')
 xlabel('t (milliseconds)')
 ylabel('X(t)')
 
-
+    
 figure
 plot(f, abs(P1), LineWidth=1.2);
 xlim([0,500]);
 
 grid minor
 
-
-
-%f = linspace(1,200, 2000);
 omega = 2*pi*f;
 Q = 25;
 modes = 18;
@@ -137,7 +257,6 @@ grid minor
 xlim([0, 200])
 
 x = zeros(2, modes);
-% phi = [15, 195];
 radius = 0.075;
 
 for nn = 1:2
@@ -145,8 +264,6 @@ for nn = 1:2
         idx = cell2mat(J.idx(i));
         m = idx(1);
         kn = freqs(i)*2*pi/c;
-        %Jm = besselj(m, kn*r);
-        %Jm = Jm(r==radius);
         Jm =  besselj(m, kn*radius);
         if m~=0
             angle = pi/m + (nn-1)*pi;
@@ -168,54 +285,38 @@ for ii = 1:length(f)
     mob(ii) = 1j*2*pi*f(ii)*H21(ii);
 end
 
+close all
 figure
-plot(f, abs(H21), LineWidth=1.2, LineWidth=1.2);
-title("H21 2")
+plot(f, abs(H21), f, abs(mob), LineWidth=1.2, LineWidth=1.2);
+title("H21 vs mob 2")
+legend('H21', 'mob')
 xlim([0,200])
 grid minor
 
-
-
-%len = 2*length(f);
-%t = linspace(0, 50, len);
-%force = 0.1*exp(-(t-0.03).^2/0.01^2);
-%force_omega = fft(force);
-%force_omega = force_omega(1:len/2);
-
 % close all
-%figure
-%plot(f, abs(force_omega), LineWidth=1.2);
-%grid minor
+V = P1 .* mob;
+vel = Fs*ifft(V, L);
 
-% displacement = force_omega.*mob;
-displacement = P1.*H21;
+dsp = cumtrapz(t, real(vel));
+
 
 figure
-plot(f, abs(displacement), LineWidth=1.2, LineWidth=1.2);
+plot(f, abs(V), f, abs(P1), LineWidth=1.2, LineWidth=1.2);
 title("H21")
 xlim([0,300])
 grid minor
-% close all
-%figure
-%plot(f, abs(displacement), LineWidth=1.2);
-%grid minor
+close
 
-
-% displacement = displacement(1:end-1);
-dsp = ifft(displacement, L);
-dsp = dsp*L;
-
-% close all
 figure
 t2 = t(1:length(t)/2);
-plot(t, real(dsp), LineWidth=1.2);
-hold on
-plot(t, force*3e-5, LineWidth=1.2);
+plot(t, dsp, t, dsp2, LineWidth=1.2);
+% hold on
+% plot(t, force, LineWidth=1.2);
+legend('dsp3', 'dsp2', 'force')
 grid minor
 xlim([0, 1])
-
-
-
+title('displacement with mobility method')
+% close 
 
 %% PART 1- c
 
