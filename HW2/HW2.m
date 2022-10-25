@@ -9,6 +9,7 @@ sigma = 0.07; % kg/m^2
 
 %% PART 1 - a
 
+
 c = sqrt(T/sigma);
 
 %% PART 1-b
@@ -42,9 +43,9 @@ theta = linspace(0, 2*pi, 101);
 r = linspace(0, a, 101);
 
 close all
-figure('Renderer', 'painters', 'Position', [10 10 1200 800])
+figure('Renderer', 'painters', 'Position', [10 10 800 1200])
 for i=1:6
-    subplot(2,3, i)
+    subplot(3,2, i)
     idx = cell2mat(J.idx(i));
     m = idx(1);
     kn = freqs(i)*2*pi/c;
@@ -54,13 +55,14 @@ for i=1:6
     view(2);
     colorbar
     grid minor
-    title(['f_{ ', num2str(idx), '}= ', num2str(freqs(i)), ' Hz'], Interpreter="tex")
+    title(['f_{ ', num2str(idx), '}= ', ...
+        num2str(freqs(i)), ' Hz'], Interpreter="tex", FontSize=14)
 end
-sgtitle("First six modes of resonance")
+sgtitle("First six modeshapes of resonance")
 
 %% PART 1- c 2
 close all
-Fs = 24000;
+Fs = 48000;
 T = 1/Fs;
 t_time = 2;
 L = t_time*Fs; % number of samples
@@ -70,7 +72,7 @@ t = linspace(0, t_time, L);
 
 force = 0.1*exp(-(t-0.03).^2/0.01^2);
 force_omega = fft(force, NFFT);
-P2 = force_omega/L;
+P2 = force_omega/Fs;
 P1 = 2*P2(1:NFFT/2);
 % P1(2:end-1) = 2*P1(2:end-1);
 
@@ -89,8 +91,9 @@ modes = 18;
 
 H = zeros(18, length(f));
 
-modal_mass = zeros(1, 18);
+modal_mass = zeros(18, 1);
 
+% MODAL FRM
 for i = 1:modes
     
         omega0i = (2*pi*freqs(i));
@@ -99,15 +102,18 @@ for i = 1:modes
         idx = cell2mat(J.idx(i));
         mm = idx(1);
         kk = freqs(i)*2*pi/c;
-        polar_func = @(phi, rr) sigma * (exp(1j*mm*phi).*besselj(mm, kk*rr)).^2 .* rr;
+        polar_func = @(phi, rr)  sigma * abs((exp(1j*mm*phi).*besselj(mm, kk*rr))).^2 .* rr ;
         modal_mass(i) = integral2(polar_func, 0, 2*pi, 0, a);
+%         modal_mass = ones(18,1);
 
         H(i, :) = (modal_mass(i))^-1 ./ (-omega.^2 + 1j*omega*omega0i/Q + omega0i^2);
+%         H(i, :) = 1 ./ (-omega.^2 + 1j*omega*omega0i/Q + omega0i^2);
 end
 
 x = zeros(2, modes);
 radius = 0.075;
 
+% EIGENMODES
 for nn = 1:2
     for i=1:modes
         idx = cell2mat(J.idx(i));
@@ -130,15 +136,16 @@ mob = zeros(1,length(f));
 for ii = 1:length(f)
     % zer = zeros(1, 200);
     H_tmp = diag(H(:,ii));
-    H21(ii) = x(1,:) * H_tmp * x(2,:)' / L;
+    H21(ii) = x(1,:) * H_tmp * x(2,:)' ;
     mob(ii) = 1j*2*pi*f(ii)*H21(ii);
 end
 
 % H21 = ones(1,length(f1));
 
-figure
+figure('Renderer', 'painters', 'Position', [100 100 800 300])
 plot(f, abs(H21), LineWidth=1.2, LineWidth=1.2);
-title("H21_2(\omega)")
+title("Receptance")
+xlabel('freq [Hz]'); ylabel('|H_{21}(f)| [m/N]')
 xlim([0,200])
 grid minor
 
@@ -152,20 +159,34 @@ xlim([0,200])
 grid minor
 % close 
 
-dsp = ifft(displacement, NFFT);
+dsp = Fs*ifft(displacement, NFFT);
 % dsp2 = [real(dsp(1, L/2)), zeros(1, L/2-1)];
 dsp2 = real(dsp);
 
 % close all
-figure
-plot(t, dsp2, t, force, LineWidth=1.2);
+figure('Renderer', 'painters', 'Position', [100 100 800 600])
+subplot 212
+plot(t, dsp2, LineWidth=1.3);
 hold on
 grid minor
-title('disp(t)')
-xlim([0, 1])
+% legend('Displacement', 'Force*10^{-2}')
+title('x(t)')
+xlabel('t [s]'); ylabel('x(t) [m]')
+xlim([0, 1.5])
 
+subplot 211
+plot(f, abs(displacement), LineWidth=1.3);
+title("X (\omega)")
+xlim([0,200])
+xlabel('freq [Hz]')
+ylabel('|X(f)| [m\cdot s]')
+grid minor
+
+sgtitle('Displacement in measure point')
 %% SOUND OF MEMBRANE
 sound(dsp2/max(dsp2), Fs);
+%%
+audiowrite('membrana.wav', 0.9*dsp2/max(dsp2), Fs);
 
 %% PART 1 - c3 (mobility method) 
 
@@ -190,7 +211,7 @@ title('Signal Corrupted with Zero-Mean Random Noise')
 xlabel('t (milliseconds)')
 ylabel('X(t)')
 
-
+    
 figure
 plot(f, abs(P1), LineWidth=1.2);
 xlim([0,500]);
