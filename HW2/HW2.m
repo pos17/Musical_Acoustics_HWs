@@ -454,7 +454,16 @@ v_f = sqrt(1.8*f*h*c_L);
 figure
 semilogx(f, v_f, LineWidth=1.2)
 grid minor
+title('Bending waves propagation speed as frequency function', Interpreter='tex');
+xlabel("Frequency [Hz]")
+ylabel("v(f) [m/s]")
 
+figure
+plot(f, v_f, LineWidth=1.2)
+grid minor
+title('Bending waves propagation speed as frequency function', Interpreter='tex');
+xlabel("Frequency [Hz]")
+ylabel("v(f) [m/s]")
 %% f) modal frequencies of the five bending modes of the plate
 
 close all;
