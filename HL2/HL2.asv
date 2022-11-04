@@ -22,20 +22,7 @@ set_param('Ex1/C1', 'c', num2str(C));
 
 open_system("HL2\Ex1.slx", 'loadonly');
 out = sim("HL2\Ex1.slx", dur);
-%%
-input = out.force.Data;
-output = out.velocity.Data;
 
-f = linspace(0, Fs, N);
-H = fft(output)./fft(input);
-
-close all
-figure;
-plot(f, db(abs(H)), LineWidth=1.2);
-xlim([0, Fs/2]); ylim([-100, 0]);
-xlabel('Freq [Hz]'); ylabel("|H| [dB]");
-title("")
-grid minor
-
+input = out.force.Data;input = out.force.Data;
 
 
