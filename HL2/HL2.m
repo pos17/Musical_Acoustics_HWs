@@ -14,6 +14,9 @@ N = dur*Fs+1;
 r = sqrt(S/pi);
 deltaL = 0.6*r+(8/(3*pi)*r); 
 l1 = l+deltaL;  
+% l1=l;
+
+f = linspace(0, Fs, N);
 
 %% EX1 - electrical
 
@@ -33,7 +36,6 @@ out = sim("HL2\Ex1.slx", dur);
 input = out.force.Data;
 output = out.velocity.Data;
 
-f = linspace(0, Fs, N);
 H = fft(output)./fft(input);
 f0 = f(find(db(abs(H))==max(db(abs(H))),1));
 
@@ -47,6 +49,7 @@ hold on
 xline(f0, '--')
 text(f0*(1.01), -70, 'f_0')
 grid minor
+ylim([-100, 0])
 % delete(".\plots\Ex1_A_FRF.png");
 % saveas(gcf, ".\plots\Ex1_A_FRF.png");
 
@@ -54,4 +57,18 @@ grid minor
 
 
 f0_an = c/(2*pi)*sqrt(S/(l1*V0));
+% Z0 = rho*c/S;
+% w = 2*pi*f;
+% nu = c*(1-(1.65e-3)./(r*sqrt(f)));
+% alpha = 3e-5*sqrt(f)/r;
+% % num = tanh(alpha*l)+1i*tan(w*l./nu);
+% % den = 1 + 1i*tanh(alpha*l).*tan(w*l./nu);
+% 
+% k = w/c;
+% Z_v = rho*c^2./(1i*w*V0);
+% 
+% num = Z_v.*cos(k*l) + 1i*Z0*sin(k*l);
+% den = 1i*Z_v.*sin(k*l) + Z0*cos(k*l);
+% 
+% Zin = Z0*num./den;
 
