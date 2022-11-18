@@ -3,7 +3,7 @@ clear; close all; clc;
 
 V0 = 0.1; % m3
 l = 10e-2; % m
-S = 100e-6; % m2
+S = 100; % m2
 c = 343; % m/s
 rho = 1.2; % kg/m3
 
@@ -11,9 +11,13 @@ Fs = 48000;
 dur = 3;
 N = dur*Fs+1;
 
+r = sqrt(S/pi);
+deltaL = 0.6*r+(8/(3*pi)*r); 
+l1 = l+deltaL;  
+
 %% EX1 - electrical
 
-M =  rho*l/S;
+M =  rho*l1/S;
 C = V0/(rho*c^2);
 R = rho*c/S;
 
@@ -48,7 +52,6 @@ grid minor
 
 %% EX1 B
 
-r = sqrt(S/pi);
-deltaL = 1.6*r; 
-f0_an = c/(2*pi)*sqrt(S/(l*V0));
+
+f0_an = c/(2*pi)*sqrt(S/(l1*V0));
 
