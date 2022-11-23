@@ -19,24 +19,35 @@ clc
 % as C2.
 
 % Temporal sampling parameters
+Fs = 16000 % [Hz]
+time_L = 8; % [s]
 
-f_1 = 65.4 %[Hz] % Fundamental note
+
+f_1 = 65.4; %[Hz] % Fundamental note
 % Boundary          
 
-% String parameters
 
-b_1 = 0.5; %air damping coefficient
-b_2 = 0.5; %string internal friction coefficient
-w = 0.2; % width of the hammer spatial window 𝑔
-Vh_0 = 2.5 % [m/s]  initial hammer velocity
-epsilon = 7.5 * 10^(-6); %string stiffness parameter
-k = epsilon; % string stiffness coefficient
+% String parameters
+str_L = 1.92;           % [m]   string length
+b_1 = 0.5;              %       air damping coefficient
+b_2 = 6.25e-9;          %       string internal friction coefficient
+w = 0.2;                %       width of the hammer spatial window 𝑔
+Vh_0 = 2.5;             % [m/s] initial hammer velocity
+epsilon = 7.5 * 10^(-6);%       string stiffness parameter
+k = epsilon;            %       string stiffness coefficient
 
 
 
 % Spatial sampling parameters
+
+
+
 % Aliasing condition
+
+
 % Number of maximum spatial steps
+gamma = Fs/2*f_1;
+N_max = sqrt((sqrt(-1+(1+(16*epsilon*gamma^2))))/(8*epsilon))
 
 % Integer values
 % Spatial sampling
