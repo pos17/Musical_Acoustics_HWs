@@ -25,6 +25,15 @@ f_1 = 65.4 %[Hz] % Fundamental note
 
 % String parameters
 
+b_1 = 0.5; %air damping coefficient
+b_2 = 0.5; %string internal friction coefficient
+w = 0.2; % width of the hammer spatial window 𝑔
+Vh_0 = 2.5 % [m/s]  initial hammer velocity
+epsilon = 7.5 * 10^(-6); %string stiffness parameter
+k = epsilon; % string stiffness coefficient
+
+
+
 % Spatial sampling parameters
 % Aliasing condition
 % Number of maximum spatial steps
