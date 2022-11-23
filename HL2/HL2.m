@@ -18,6 +18,10 @@ l1 = l+deltaL;
 
 f = linspace(0, Fs, N);
 
+w = 2*pi*f;
+Z0 = R + 1i*(w*M-1./(w*C));
+Y0 = 1./Z0;
+
 %% EX1 - electrical
 
 M =  rho*l1/S;
@@ -25,7 +29,7 @@ C = V0/(rho*c^2);
 R = rho*c/S;
 
 set_param('Ex1', 'PreLoadFcn', num2str(Fs))
-set_param('Ex1/M1', 'l', num2str(M));
+set_param('Ex1/L1', 'l', num2str(M));
 set_param('Ex1/C1', 'c', num2str(C));
 set_param('Ex1/R1', 'R', num2str(R));
 
@@ -39,17 +43,21 @@ output = out.velocity.Data;
 H = fft(output)./fft(input);
 f0 = f(find(db(abs(H))==max(db(abs(H))),1));
 
+%%
 close all
 figure('Renderer', 'painters', 'Position', [100 100 800 400])
-plot(f, db(abs(H)), LineWidth=1.2);
+plot(f, db(abs(H)), LineWidth=1.7);
 xlim([0, 2*f0]);% ylim([-100, 0]);
 xlabel('Freq [Hz]'); ylabel("|H| [dB]");
 title("Frequency response of the resonator")
 hold on
-xline(f0, '--')
-text(f0*(1.01), -70, 'f_0')
+xline(f0, '--', LineWidth=1.2)
+text(f0*(1.01), -70, 'f_0', FontSize=12)
 grid minor
 ylim([-100, 0])
+hold on
+plot(f, db(abs(Y0)), 'r--', LineWidth=1.8);
+legend('experimental', 'numerical')
 % delete(".\plots\Ex1_A_FRF.png");
 % saveas(gcf, ".\plots\Ex1_A_FRF.png");
 
@@ -57,18 +65,4 @@ ylim([-100, 0])
 
 
 f0_an = c/(2*pi)*sqrt(S/(l1*V0));
-% Z0 = rho*c/S;
-% w = 2*pi*f;
-% nu = c*(1-(1.65e-3)./(r*sqrt(f)));
-% alpha = 3e-5*sqrt(f)/r;
-% % num = tanh(alpha*l)+1i*tan(w*l./nu);
-% % den = 1 + 1i*tanh(alpha*l).*tan(w*l./nu);
-% 
-% k = w/c;
-% Z_v = rho*c^2./(1i*w*V0);
-% 
-% num = Z_v.*cos(k*l) + 1i*Z0*sin(k*l);
-% den = 1i*Z_v.*sin(k*l) + Z0*cos(k*l);
-% 
-% Zin = Z0*num./den;
 
