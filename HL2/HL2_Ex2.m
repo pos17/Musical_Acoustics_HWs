@@ -1,3 +1,29 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% HL2
+% Exercise 2
+% Helmoholtz resonators tree
+% All the parameters assigned are imported from the exercise 1
+% This script call the simulink file that implements the Helmotz trees
+% discussed in the report, the trees are not in the same order but the
+% topology and parameters are specified by the comments on the code and 
+% on the graphs.
+% Before the run of the matlab code please open on simulink the files: 
+%   * Ex2_A.slx
+%   * Ex2_B.slx
+%   * Ex2_C.slx
+%   * Ex2_D.slx
+%   * Ex2_E.slx
+%
+% 
+% 
+% 
+% Musical Acoustic Course
+% Donà Stefano
+% Ostan Paolo
+% 2022
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 clear; close all; clc;
 % Set of parameters
 
@@ -12,9 +38,9 @@ dur = 3;
 N = dur*Fs+1;
 a = sqrt(S/pi);
 
-l = l1 + 8/3/pi*a + 0.6*a
+l = l1 + 8/3/pi*a + 0.6*a;
 %l=l1
-%% 
+%% Electrical components 
 
 M =  rho*l/S;
 C = V0/(rho*c^2);
@@ -23,21 +49,12 @@ R = rho*c/S;
 f = linspace(0, Fs, N);
 w = 2*pi*f;
 
-Z = R+j*w*M+(j*w*C).^(-1);
+Z = R+1i*w*M+(1i*w*C).^(-1);
 
-%% EX2 A - electrical
+%% EX2 A Full 3x2 Tree
 set_param('Ex2_A', 'PreLoadFcn', num2str(Fs));
 
 
-
-
-%for ii=1:7
-%    set_param(['Ex2/L' num2str(ii)], 'l', num2str(M));
-%    set_param(['Ex2/C' num2str(ii)], 'c', num2str(C));
-%    set_param(['Ex2/R' num2str(ii)], 'R', num2str(R));
-%end
-
-%set_param('Ex2', 'PreLoadFcn', num2str(Fs));
 for i=1:7
     subsys_name =strcat('Ex2_A/Subsystem',num2str(i),'/');
     set_param(strcat(subsys_name,'L1'), 'l', num2str(M));
@@ -55,83 +72,36 @@ vel2 = out.vel2.Data;
 press = out.pressure.Data;
 
 H0 = db(abs(fft(vel0)./fft(press)));
-H0_phase = unwrap(angle(fft(vel0)./fft(press)));
 H1 = db(abs(fft(vel1)./fft(press)));
 H2 = db(abs(fft(vel2)./fft(press)));
 
 [val,f0] = findpeaks(H0);
-f0 = 48000/144001 * f0
-close all
+f0 = 48000/144001 * f0;
+%close all
 figure('Renderer', 'painters', 'Position', [100 100 1000 500])
-subplot(2,1,1);
 plot(f, H0, LineWidth=1.2);
 xlim([0, 2500]); ylim([-100, 0])
 hold on
 
 plot(f, H1, LineWidth=1.2);
-% xlim([0, Fs/2]);
 hold on
 plot(f, H2, LineWidth=1.2);
-% xlim([0, Fs/2]);
 grid minor
 hold on
 xline(f0(1), 'k--')
 text(f0(1)*(1.01), -90, strcat('f_0=',num2str(f0(1))))
-
 xline(f0(2), 'k--')
 text(f0(2)*(1.01), -90, strcat('f_1=',num2str(f0(2))))
 xline(f0(3), 'k--')
 text(f0(3)*(1.01), -90, strcat('f_2=',num2str(f0(3))))
 legend('H0', 'H1', 'H2')
 xlabel('Freq [Hz]'); ylabel("|H| [dB]");
-title("Frequency Response functions of the system")
-subplot(2,1,2)
-plot(f, H0_phase, LineWidth=1.2);
-hold on 
-xlim([0, 2500]);
-delete("./plots/Ex2_A_FRF.png");
-saveas(gcf, "./plots/Ex2_A_FRF.png");
+title("Full 3x2 Tree, Frequency Response functions of the system")
 
-%%
-close all
+%delete("./plots/Ex2_A_FRF.png");
+%saveas(gcf, "./plots/Ex2_A_FRF.png");
 
-figure;
-for nn = 1:5
-    Ztot = 0;
-    N=nn;
-    K=2;
-    for ii=0:N
-        Ztot = Ztot + Z/(K)^ii;
-    end
-    
-    mob = 1./Ztot;
-    plot(f, db(abs(mob)), LineWidth=1.2);
-    xlim([0, f0*2]); ylim([-100, 0])
-    hold on
-end
-legend('N=1','N=2','N=3','N=4','N=5')
-grid minor
-
-
-figure;
-for kk = 2:6
-    Ztot = 0;
-    N=3;
-    K=kk;
-    for ii=0:N
-        Ztot = Ztot + Z/(K)^ii;
-    end
-    
-    mob = 1./Ztot;
-    plot(f, db(abs(mob)), LineWidth=1.2);
-    xlim([0, f0*2]); ylim([-100, 0])
-    hold on
-end
-legend('K=1','K=2','K=3','K=4','K=5')
-grid minor
-
-
-%% Helmotz Tree B
+%% EX2 B 3x3 Tree 
 
 set_param('Ex2_B', 'PreLoadFcn', num2str(Fs))
 for i=1:7
@@ -156,29 +126,21 @@ H1 = db(abs(fft(vel1_B)./fft(press_B)));
 H2 = db(abs(fft(vel2_B)./fft(press_B)));
 H3 = db(abs(fft(vel3_B)./fft(press_B)));
 
-close all;
+%close all;
 [val,f0] = findpeaks(H0);
-f0 = 48000/144001 * f0
+f0 = 48000/144001 * f0;
 figure('Renderer', 'painters', 'Position', [100 100 1000 400])
 plot(f, H0, LineWidth=1.2);
 xlim([0, 2500]); ylim([-110, 0]);
 hold on
 plot(f, H1, LineWidth=1.2);
-% xlim([0, Fs/2]);
-
 hold on
 plot(f, H2, LineWidth=1.2);
-% xlim([0, Fs/2]);
-
 hold on
 plot(f, H3, LineWidth=1.2);
-% xlim([0, Fs/2]);
-
 xlabel('Freq [Hz]'); ylabel("|H| [dB]");
-%xline(f0, '--')
 xline(f0(1), 'k--')
 text(f0(1)*(1.01), -90, strcat('f_0=',num2str(f0(1))))
-
 xline(f0(2), 'k--')
 text(f0(2)*(1.01), -90, strcat('f_1=',num2str(f0(2))))
 xline(f0(3), 'k--')
@@ -188,12 +150,12 @@ text(f0(4)*(1.01), -90, strcat('f_3=',num2str(f0(4))))
 %text(f0*(1.01), -70, 'f_0')
 grid minor
 legend('H0', 'H1', 'H2', 'H3')
-title("Frequency Response functions of the system")
-delete(".\plots\Ex2_B_FRF.png");
-saveas(gcf, ".\plots\Ex2_B_FRF.png");
+title("3x3 Tree, Frequency Response functions of the system")
+%delete(".\plots\Ex2_B_FRF.png");
+%saveas(gcf, ".\plots\Ex2_B_FRF.png");
 
 
-%% Helmotz Tree C
+%% EX2 C 2x3 Tree 
 
 set_param('Ex2_C', 'PreLoadFcn', num2str(Fs))
 for i=1:4
@@ -215,32 +177,29 @@ H0 = db(abs(fft(vel0_C)./fft(press_C)));
 H1 = db(abs(fft(vel1_C)./fft(press_C)));
 
 
-close all;
+%close all;
 
 [val,f0] = findpeaks(H0);
-f0 = 48000/144001 * f0
+f0 = 48000/144001 * f0;
 
 figure('Renderer', 'painters', 'Position', [100 100 1000 400])
 plot(f, H0, LineWidth=1.2);
 xlim([0, 2500]); ylim([-110, 0]);
 hold on
 plot(f, H1, LineWidth=1.2);
-% xlim([0, Fs/2]);
-
 xlabel('Freq [Hz]'); ylabel("|H| [dB]");
-%xline(f0, '--')
 xline(f0(1), 'k--')
 text(f0(1)*(1.01), -90, strcat('f_0=',num2str(f0(1))))
-
 xline(f0(2), 'k--')
 text(f0(2)*(1.01), -90, strcat('f_1=',num2str(f0(2))))
 grid minor
 legend('H0', 'H1')
-title("Frequency Response functions of the system")
-delete(".\plots\Ex2_C_FRF.png");
-saveas(gcf, ".\plots\Ex2_C_FRF.png");
+title("2x3 Tree, Frequency Response functions of the system")
+%delete(".\plots\Ex2_C_FRF.png");
+%saveas(gcf, ".\plots\Ex2_C_FRF.png");
 
-%% Helmotz Tree D
+%% EX2 D Full 2x2 Tree 
+
 
 % Numerical Solution for tree of height 2 and two siblings every parent
 
@@ -271,10 +230,10 @@ H0 = db(abs(fft(vel0_D)./fft(press_D)));
 H1 = db(abs(fft(vel1_D)./fft(press_D)));
 
 
-close all;
+%close all;
 
 [val,f0] = findpeaks(H0);
-f0 = 48000/144001 * f0
+f0 = 48000/144001 * f0;
 
 figure('Renderer', 'painters', 'Position', [100 100 1000 400])
 plot(f, H0, LineWidth=1.2);
@@ -296,24 +255,15 @@ xline(f0(2), 'k--')
 text(f0(2)*(1.01), -90, strcat('f_1=',num2str(f0(2))))
 grid minor
 legend('H0', 'H1', 'H0 numerical')
-title("Frequency Response functions of the system")
-delete(".\plots\Ex2_D_FRF.png");
-saveas(gcf, ".\plots\Ex2_D_FRF.png");
+title("Full 2x2 Tree, Frequency Response functions of the system")
+%delete(".\plots\Ex2_D_FRF.png");
+%saveas(gcf, ".\plots\Ex2_D_FRF.png");
 
-%% EX 2 E
+%% EX2 E 4x2 Tree 
+
 
 set_param('Ex2_E', 'PreLoadFcn', num2str(Fs));
 
-
-
-
-%for ii=1:7
-%    set_param(['Ex2/L' num2str(ii)], 'l', num2str(M));
-%    set_param(['Ex2/C' num2str(ii)], 'c', num2str(C));
-%    set_param(['Ex2/R' num2str(ii)], 'R', num2str(R));
-%end
-
-%set_param('Ex2', 'PreLoadFcn', num2str(Fs));
 for i=1:9
     subsys_name =strcat('Ex2_E/Subsystem',num2str(i-1),'/');
     set_param(strcat(subsys_name,'L1'), 'l', num2str(M));
@@ -333,7 +283,6 @@ vel5 = out.vel5.Data;
 vel6 = out.vel6.Data;
 
 press = out.pressure.Data;
-%H0_phase = unwrap(angle(fft(vel0)./fft(press)));
 H0 = db(abs(fft(vel0)./fft(press)));
 H1 = db(abs(fft(vel1)./fft(press)));
 H2 = db(abs(fft(vel2)./fft(press)));
@@ -343,8 +292,8 @@ H5 = db(abs(fft(vel5)./fft(press)));
 H6 = db(abs(fft(vel6)./fft(press)));
 
 [val,f0] = findpeaks(H0);
-f0 = 48000/144001 * f0
-close all
+f0 = 48000/144001 * f0;
+%close all
 figure('Renderer', 'painters', 'Position', [100 100 1000 500])
 plot(f, H0, LineWidth=1.2);
 xlim([0, 1600]); ylim([-120, -10])
@@ -393,13 +342,6 @@ text(f0(7)*(1.01), -90, strcat('f_2=',num2str(f0(7))))
 
 legend('H0', 'H1', 'H2','H3', 'H4', 'H5', 'H6')
 xlabel('Freq [Hz]'); ylabel("|H| [dB]");
-title("Frequency Response functions of the system")
-delete("./plots/Ex2_E_FRF.png");
-saveas(gcf, "./plots/Ex2_E_FRF.png");
-%%
-figure('Renderer', 'painters', 'Position', [100 100 1000 500])
-plot(f, H0_phase, LineWidth=1.2);
-xlim([0, 1600]); %ylim([-100, 0])
-title("Frequency Response function phase of the system")
-
-hold on
+title("4x2 Tree, Frequency Response functions of the system")
+%delete("./plots/Ex2_E_FRF.png");
+%saveas(gcf, "./plots/Ex2_E_FRF.png");
