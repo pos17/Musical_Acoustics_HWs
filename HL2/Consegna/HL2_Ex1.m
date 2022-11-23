@@ -44,16 +44,17 @@ M =  rho*l1/S;
 C = V0/(rho*c^2);
 R = rho*c/S;
 
-% setting parameters in the
+% setting parameters in the model
 set_param('Ex1', 'PreLoadFcn', num2str(Fs))
 set_param('Ex1/L1', 'l', num2str(M));
 set_param('Ex1/C1', 'c', num2str(C));
 set_param('Ex1/R1', 'R', num2str(R));
 
-
+% simulation
 open_system("HL2\Ex1.slx", 'loadonly');
 out = sim("HL2\Ex1.slx", dur);
 
+% extracting data from the simulation results
 input = out.force.Data;
 output = out.velocity.Data;
 
