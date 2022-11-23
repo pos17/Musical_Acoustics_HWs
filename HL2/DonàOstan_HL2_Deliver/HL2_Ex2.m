@@ -62,8 +62,8 @@ for i=1:7
     set_param(strcat(subsys_name,'R1'), 'R', num2str(R));
 end
 
-open_system("HL2/Ex2_A.slx", 'loadonly');
-out = sim("HL2/Ex2_A.slx", dur);
+open_system("Ex2_A.slx", 'loadonly');
+out = sim("Ex2_A.slx", dur);
 disp("done")
 
 vel0 = out.vel0.Data;
@@ -111,8 +111,8 @@ for i=1:7
     set_param(strcat(subsys_name,'R1'), 'R', num2str(R));
 end
 
-open_system("HL2/Ex2_B.slx", 'loadonly');
-out2_B = sim("HL2/Ex2_B.slx", dur);
+open_system("Ex2_B.slx", 'loadonly');
+out2_B = sim("Ex2_B.slx", dur);
 
 press_B = out2_B.pressure.Data;
 vel0_B = out2_B.vel0.Data;
@@ -165,8 +165,8 @@ for i=1:4
     set_param(strcat(subsys_name,'R1'), 'R', num2str(R));
 end
 
-open_system("HL2/Ex2_C.slx", 'loadonly');
-out2_C = sim("HL2/Ex2_C.slx", dur);
+open_system("Ex2_C.slx", 'loadonly');
+out2_C = sim("Ex2_C.slx", dur);
 
 press_C = out2_C.pressure.Data;
 vel0_C = out2_C.vel0.Data;
@@ -218,8 +218,8 @@ for i=1:3
     set_param(strcat(subsys_name,'R1'), 'R', num2str(R));
 end
 
-open_system("HL2/Ex2_D.slx", 'loadonly');
-out2_D = sim("HL2/Ex2_D.slx", dur);
+open_system("Ex2_D.slx", 'loadonly');
+out2_D = sim("Ex2_D.slx", dur);
 
 press_D = out2_D.pressure.Data;
 vel0_D = out2_D.vel0.Data;
@@ -271,8 +271,8 @@ for i=1:9
     set_param(strcat(subsys_name,'R1'), 'R', num2str(R));
 end
 
-open_system("HL2/Ex2_E.slx", 'loadonly');
-out = sim("HL2/Ex2_E.slx", dur);
+open_system("Ex2_E.slx", 'loadonly');
+out = sim("Ex2_E.slx", dur);
 disp("done")
 vel0 = out.vel0.Data;
 vel1 = out.vel1.Data;

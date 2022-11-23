@@ -16,6 +16,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 clear; close all; clc;
+addpath("./");
 % Set of parameters
 V0 = 0.1; % m3
 l = 10e-2; % m
@@ -51,8 +52,8 @@ set_param('Ex1/C1', 'c', num2str(C));
 set_param('Ex1/R1', 'R', num2str(R));
 
 % simulation
-open_system("HL2\Ex1.slx", 'loadonly');
-out = sim("HL2\Ex1.slx", dur);
+open_system("Ex1.slx", 'loadonly');
+out = sim("Ex1.slx", dur);
 
 % extracting data from the simulation results
 input = out.force.Data;
