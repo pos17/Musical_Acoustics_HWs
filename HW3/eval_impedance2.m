@@ -1,13 +1,13 @@
-function Zin = eval_impedance2(Npoints, L, a0, rho, c, k)
+function [Zin, ZL] = eval_impedance2(Npoints, L, a0, rho, c, k)
     Zin = zeros(1,length(k));
     x = linspace(0,L,Npoints);
     m = 4.2;
     a = a0.*exp(m*x);
 
-    a=a0*exp(m*L);
+    aL = a0*exp(m*L);
     w = k*c;
-    ZL0 = 0.25*(w.^2*rho)/(c*pi) + 0.61*1i*(rho*w)/(pi*a);
-    Sp = a^2*pi;
+    ZL0 = 0.25*(w.^2*rho)/(c*pi) + 0.61*1i*(rho*w)/(pi*aL);
+    Sp = aL^2*pi;
     
     ii = length(x);
     
