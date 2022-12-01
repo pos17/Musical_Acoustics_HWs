@@ -19,10 +19,10 @@ clc
 % as C2.
 
 % Temporal sampling parameters
-Fs = 16000;             % [Hz] Following the paper
-%Fs = 4*44100;             % [Hz] Following the slides
+Fs = 16000;                     % [Hz] Following the paper
+%Fs = 4*44100;                  % [Hz] Following the slides
 T = 1/Fs;
-dur = 8;             % [s]
+dur = 8;                        % [s]
 N = dur*Fs;
 %t = linspace(0, Fs, N);
 
@@ -33,21 +33,21 @@ z_l = 1e+20;
 z_b = 1000;
 
 % String parameters
-f_1 = 65.4;             % [Hz]  Fundamental note
-str_L = 1.92;           % [m]   string length
-M_s = 35e-3;            % [Kg]  String mass
-%T_e = 750;              % [N]   string tension given  by the slides
+f_1 = 65.4;                     % [Hz]  Fundamental note
+str_L = 1.92;                   % [m]   string length
+M_s = 35e-3;                    % [Kg]  String mass
+%T_e = 750;                     % [N]   string tension given  by the slides
  
 
-b_1 = 0.5;              %       air damping coefficient
-b_2 = 6.25e-9;          %       string internal friction coefficient
-epsilon = 7.5 * 10^(-6);%       string stiffness parameter
-k = epsilon;            %       string stiffness coefficient
+b_1 = 0.5;                      %       air damping coefficient
+b_2 = 6.25e-9;                  %       string internal friction coefficient
+epsilon = 7.5 * 10^(-6);        %       string stiffness parameter
+k = epsilon;                    %       string stiffness coefficient
 
-rho = M_s / str_L;      % [Kg/m]string linear density    
+rho = M_s / str_L;              % [Kg/m]string linear density    
 
-T_e = 4*str_L^2*rho*f_1^2;              % [N]   string tension calculated  
-c = sqrt(T_e/rho);      % [m/s] string propagation velocity
+T_e = 4*str_L^2*rho*f_1^2;      % [N]   string tension calculated  
+c = sqrt(T_e/rho);              % [m/s] string propagation velocity
 
 % Spatial sampling parameters
 %M = X = T * c       % maximum value which allows CFL conditions
@@ -85,14 +85,14 @@ a_5 = (-v)/(1+b_1*T);
 a_F = (T^2/rho)/(1+b_1*T);
 
 % Hammer parameters
-M_H = 4.9e-3;           % [Kg]  mass of the hammer
-w = 0.2;                %       width of the hammer spatial window 𝑔
+M_H = 4.9e-3;                   % [Kg]  mass of the hammer
+w = 0.2;                        %       width of the hammer spatial window 𝑔
 p = 2.3;
-Vh_0 = 2.5;             % [m/s] initial hammer velocity
-b_H = 1e-4;             % [1/s] fluid damping coefficient
-K = 4e+8;               %       hammer felt stiffness
-a=0.12;                  %       x_0/L relative position of hammer strike
-a_M = floor(M*a);              %       relative hammer position in space samples
+Vh_0 = 2.5;                     % [m/s] initial hammer velocity
+b_H = 1e-4;                     % [1/s] fluid damping coefficient
+K = 4e+8;                       %       hammer felt stiffness
+a=0.12;                         %       x_0/L relative position of hammer strike
+a_M = floor(M*a);               %       relative hammer position in space samples
 
 % Hammer contact window definition
 w_M= round(w/X);
@@ -148,13 +148,20 @@ for i=1:N
 end
 
 
-%%
+%% g(x,x0) force density
 figure('Renderer', 'painters', 'Position', [100 100 1000 500])
-plot(space/str_L, F(10,:), LineWidth=1.2);
+%plot(space/str_L, F(10,:), LineWidth=1.2);
+plot(space, F(10,:), LineWidth=1.2);
+
 grid minor;
 % surf(F);
 disp(F(10,a_M));
-%%
+xlabel("S [m]")
+title('$g(x,x_{0})$ shape and position of the force density function','interpreter','latex','FontSize',15)
+
+delete("./pianoAssets/ForceDensityShape.png");
+saveas(gcf, "./pianoAssets/ForceDensityShape.png");
+%%  LOOPS CALCULATIONS 
 
 % eta hammer displacement vector 
 eta = zeros(N,1);
@@ -219,16 +226,27 @@ for in=2:N-1          %   time loop
     end
     av_y(in,1) = av_y(in,1)/12;
     
-    % Plot the displacement in time
-    if rem(in,200)==1
-        plot(y(in+1,:),LineWidth=1.2);
-        ylim([-0.0005 0.0005])
-        grid on;
-        title('t = ');
-        drawnow;
-    end
-
+    
 end
+
+%% Plot the displacement of the whole string in time
+figure('Renderer', 'painters', 'Position', [100 100 1000 500])
+for i = 1:(20*dur)
+    iTime = i*1/20*Fs;
+
+    %if rem(in,200)==1
+    
+    grid minor;
+    plot(y(iTime,:),LineWidth=1.2);
+    ylim([-0.0005 0.0005])
+    grid on;
+    title(strcat('t = ',num2str(i*0.05)));
+
+    drawnow;
+    pause(1/20);
+    %end
+end
+
 %%
 f=linspace(0,Fs,N);
 freqs = abs(fft(y(:,a_M)));
@@ -261,10 +279,17 @@ xlim([0,0.1]);
 %% Plot the synthesized signal play it and save it on the disk
 
 % Play the sound
-
-sound(av_y*10^3,Fs)
+av_y_save = av_y*10^3;
+sound(av_y_save,Fs)
+% pause(10);
+% sound(diff(av_y_save)*10,Fs)
 
 % Save on disk
+
+filename = 'piano_Note.wav';
+audiowrite(filename,av_y,Fs);
+%clear y_av Fs
+
 
 
 
