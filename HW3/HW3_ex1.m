@@ -10,7 +10,8 @@ rho = 1.21; % kg/m3
 
 
 %freq axis
-f = linspace(1, 2000, 2000);
+% f = linspace(1, 2000, 2000);
+f = 1:2000;
 w = 2*pi*f;
 k = w/c;
 
@@ -25,9 +26,6 @@ den_anal = rho*c/S2_anal * cos(b*L-theta);
 Zin_anal = rho*c/S1_anal*(num_anal./den_anal);
 
 %% ERRORS
-% Npoints = [0.1, 0.2, 0.5, 0.8, 1, 2, 5, 8, ... 
-%     10, 20, 50, 80, 100, 200, 500, 800, ...
-%     1000, 2000, 5000]*100;
 
 % Npoints = flip(round(logspace(0, 2, 20)));
 Npoints = flip(1:30);
@@ -42,11 +40,11 @@ for jj = 1:length(e1)
     int = trapz(w,arg);
     e1(jj) = 1/(w(end)-w(1))*int;
     
-    [pks1, locs1] = findpeaks(abs(Zin));
-    [pks2, locs2] = findpeaks(abs(Zin_anal));
+    [pks10, locs10] = findpeaks(abs(Zin));
+    [pks20, locs20] = findpeaks(abs(Zin_anal));
 
-    for ii=1:length(locs1)
-         e2(jj)=e2(jj)+min(abs(w(locs1(ii))-w(locs2(ii))));
+    for ii=1:length(locs10)
+         e2(jj)=e2(jj)+min(abs(w(locs10(ii))-w(locs20(ii))));
     end
     
     deltas(jj) = l;
@@ -56,13 +54,10 @@ end
 
 close all
 figure('Renderer', 'painters', 'Position', [100 100 800 400])
-semilogy(deltas, e1, LineWidth=1.2)
+loglog(deltas, e1, '-o',LineWidth=1.2)
 xlabel("\delta [m]"); ylabel("Mean Square Error");
 title("Mean Square Error as function of \delta")
 grid minor
-% hold on
-% xline(d0, 'k--');
-% text(d0*1.5,min(e1), ["\delta="+num2str(d0)] )
 filename = "Ex1A";
 % delete([".\plots\"+filename+".png"]);
 % saveas(gcf, [".\plots\"+filename+".png"]);
@@ -70,7 +65,7 @@ filename = "Ex1A";
 %% PLOTTING E2
 
 figure('Renderer', 'painters', 'Position', [100 100 800 400])
-plot(deltas, e2, LineWidth=1.2)
+plot(deltas, e2, '-o', LineWidth=1.2)
 xlabel("\delta [m]"); ylabel("freq error");
 title("Frequency Error as function of \delta")
 grid minor
@@ -96,8 +91,8 @@ arg = abs(Zin_anal-Zin2).^2;
 int = trapz(w,arg);
 e11 = 1/(w(end)-w(1))*int;
 
-[pks1, locs1] = findpeaks(abs(Zin2));
-[pks2, locs2] = findpeaks(abs(Zin_anal));
+[pks11, locs11] = findpeaks(abs(Zin2));
+[pks21, locs21] = findpeaks(abs(Zin_anal));
 
 figure
 plot(f, db(abs(Zin2)), LineWidth=1.2)
@@ -122,7 +117,7 @@ num = Zin2.*cos(k*L1) + 1i*Z0.*sin(k*L1);
 den = 1i*Zin2.*sin(k*L1) + Z0.*cos(k*L1);
 Z_comp = Z0.*num./den;
 
-close all;
+% close all;
 figure;
 plot(f, db(abs(Z_comp)));
 grid minor
@@ -130,6 +125,34 @@ grid minor
 [pks, locs] = findpeaks(abs(Z_comp));
 f_res10 = f(locs(1:10));
 
-%% POINT E
+%% POINT E - Inharmonicity
+
+inh_exp = f(locs10);
+inh_exp2 = f(locs11);
+inh_exp = inh_exp./inh_exp(1)./(1:length(inh_exp));
+inh_exp2 = inh_exp2./inh_exp2(1)./(1:length(inh_exp2));
+
+% f_res10 = f_res10
+inh_comp = f_res10./f_res10(1)./(1:length(f_res10));
+
+disp("Horn inharmonicity")
+disp(inh_exp)
+disp("Horn w/ ext impedance inharmonicity")
+disp(inh_exp)
+disp("Compound Horn inharmonicity")
+disp(inh_comp);
+
+figure
+plot(inh_exp, '-o', LineWidth=1.2)
+hold on
+plot(inh_exp2, '-o', LineWidth=1.2)
+hold on 
+plot(inh_comp, '-o', LineWidth=1.2)
+hold on 
+plot(1:10, ones(1,10), '-o' ,LineWidth=0.8)
+grid
+legend("horn", "horn w/ load", "compound horn", "perfect harmonicity")
+xlabel('# of harmonic'); ylabel('harmonicity')
+
 
 
