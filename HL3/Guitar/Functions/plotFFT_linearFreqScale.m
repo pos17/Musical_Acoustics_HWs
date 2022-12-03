@@ -38,7 +38,7 @@ function [] = plotFFT_linearFreqScale(magS, angleS, f, df, fs, maxFreq, h)
   hold on
   %select subplot by setting current axes
   axes(ax1)
-  plot(f(1:end), magS(1:end));
+  plot(f(1:end), magS(1:end), LineWidth=1.2);
   title('Magnitude spectrum');
   ylabel('Magnitude');
   xlabel('Frequency');
@@ -52,7 +52,7 @@ function [] = plotFFT_linearFreqScale(magS, angleS, f, df, fs, maxFreq, h)
   hold on
   %select subplot by setting current axes
   axes(ax2);
-  plot(f(1:end), angleS(1:end));
+  plot(f(1:end), angleS(1:end), LineWidth=1.2);
   title('Phase spectrum');
   ylabel('Phase');
   xlabel('Frequency');
