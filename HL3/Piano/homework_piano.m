@@ -21,6 +21,8 @@ clc
 % Temporal sampling parameters
 Fs = 16000;                     % [Hz] Following the paper
 %Fs = 4*44100;                  % [Hz] Following the slides
+%Fs = 44100;                  % [Hz] Following the slides
+
 T = 1/Fs;
 dur = 8;                        % [s]
 N = dur*Fs;
@@ -62,8 +64,10 @@ c = sqrt(T_e/rho);              % [m/s] string propagation velocity
 gamma = Fs/(2*f_1);
 M_max = sqrt((-1+sqrt(1+16*epsilon*gamma^2))/(8*epsilon));
 X_max = sqrt((1/2)*(c^2*T^2 + 4*b_2*T + sqrt(((c^2)*T^2 + 4*b_2*T)^2 + 16*k^2*T^2)));
-%M_max = L/X_max;
+X_maxCFL = c/Fs;
+%M_max = str_L/X_max;
 M = floor(M_max);
+%M=120;
 X = str_L/M;
 
 % Integer values
@@ -156,7 +160,8 @@ plot(space, F(10,:), LineWidth=1.2);
 grid minor;
 % surf(F);
 disp(F(10,a_M));
-xlabel("S [m]")
+xlabel("x [m]")
+ylabel("g ")
 title('$g(x,x_{0})$ shape and position of the force density function','interpreter','latex','FontSize',15)
 
 delete("./pianoAssets/ForceDensityShape.png");
@@ -175,16 +180,9 @@ F_H(2) = K* abs(eta(2)-y(2,a_M))^p;
 
 
 for in=2:N-1          %   time loop
-    
-    
-    
 
     % force time computation
-    
-        
-        
-
-        
+   
     for im=1:M      %   space loop
 
         % solving displacement boundary conditions
@@ -232,7 +230,7 @@ end
 %% Plot the displacement of the whole string in time
 figure('Renderer', 'painters', 'Position', [100 100 1000 500])
 for i = 1:(20*dur)
-    iTime = i*1/20*Fs;
+    iTime = round(i*1/20*Fs);
 
     %if rem(in,200)==1
     
@@ -246,17 +244,40 @@ for i = 1:(20*dur)
     pause(1/20);
     %end
 end
+%% Saving some samples of the string movement for report representation 
+upper = 8;
+lower = 0.001;
+numOfPics = 9;
+picTime= logspace(1,3,numOfPics);
+picTime_01 = picTime/max(picTime) - min(picTime)/max(picTime)
+% re-scale to be between your limits (i.e. 1 and 1.05)
+picTime_08 = picTime_01*(upper-lower) + lower
 
-%%
+
+for i = 1:(numOfPics)
+    figure('Renderer', 'painters', 'Position', [100 100 800 500])
+    picTime_08Samp = round(picTime_08*Fs);
+
+    %if rem(in,200)==1
+    
+    grid minor;
+    plot(y(picTime_08Samp(i),:),LineWidth=1.8);
+    ylim([-0.0005 0.0005])
+    grid on;
+    title(strcat('string Vertical displacement y at time $t = ',num2str(picTime_08(i)),"$,",num2str(M) ," spatial samples"),'interpreter','latex','FontSize',25) 
+    % title(strcat('t = ',num2str(picTime_08(i))));
+    picName = strcat("./pianoAssets/PianoStringDispTime_",num2str(M),"_",num2str(i),".png");
+    delete(picName);
+    saveas(gcf, picName);
+end
+
+%% FFT of the averaged signal
 f=linspace(0,Fs,N);
-freqs = abs(fft(y(:,a_M)));
+freqs = abs(fft(av_y(:,1)));
 figure('Renderer', 'painters', 'Position', [100 100 1000 500])
 grid minor;
 plot(f,freqs, LineWidth=1.2);
 xlim([0,Fs/2])
-
-
-%% Averaging portion 
 
 
 %% Plot the displacement in time
@@ -264,6 +285,14 @@ t=linspace(0, dur, N);
 figure('Renderer', 'painters', 'Position', [100 100 1000 500])
 plot(t, av_y(:,1), LineWidth=1.2);
 grid minor
+
+xlabel("x [m]")
+ylabel("y [m]")
+title('Vertical displacement of the mean of 12 samples of the string around center hammering position','interpreter','latex','FontSize',15)
+
+delete("./pianoAssets/MeanDisplacement.png");
+saveas(gcf, "./pianoAssets/MeanDisplacement.png");
+
 %% Plot the force in time 
 t=linspace(0, dur, N);
 figure('Renderer', 'painters', 'Position', [100 100 1000 500])
@@ -279,21 +308,30 @@ xlim([0,0.1]);
 %% Plot the synthesized signal play it and save it on the disk
 
 % Play the sound
-av_y_save = av_y*10^3;
+av_y_save = av_y./max(abs(av_y));
 sound(av_y_save,Fs)
 % pause(10);
 % sound(diff(av_y_save)*10,Fs)
 
 % Save on disk
 
-filename = 'piano_Note.wav';
-audiowrite(filename,av_y,Fs);
+filenamePaolo = '10868276_Ostan_piano.wav';
+filenameStefano = "10868267_Donà_piano.wav";
+audiowrite(filenamePaolo,av_y_save,Fs);
+audiowrite(filenameStefano,av_y_save,Fs);
 %clear y_av Fs
 
 
+%% Spectrogram of the audio signal 
 
+figure('Renderer', 'painters', 'Position', [100 100 800 600]);
+spectrogram(av_y_save,blackman(4096),64, 4096,Fs,"power");
+xlim([0,4])
+title('Spectrogram of the mean string displacement around hammer center position ','interpreter','latex','FontSize',15);
 
-
+% plot saving 
+delete("./pianoAssets/MeanDisplacementSpectrogram.png");
+saveas(gcf, "./pianoAssets/MeanDisplacementSpectrogram.png");
 
 
 
