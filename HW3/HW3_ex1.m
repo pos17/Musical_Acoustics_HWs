@@ -34,8 +34,10 @@ e1 = zeros(1, length(Npoints));
 e2 = zeros(1, length(Npoints));
 deltas = zeros(1, length(Npoints));
 Z= zeros(1, length(f));
+
 for jj = 1:length(e1)
     [Zin,l] = eval_impedance(Npoints(jj), L, a0, rho, c, k, Z);
+
     arg = abs(Zin-Zin_anal).^2;
     int = trapz(w,arg);
     e1(jj) = 1/(w(end)-w(1))*int;
@@ -126,7 +128,7 @@ FRF_Plot('Z', Z_comp, f, 2000, jj)
 
 
 [pks, locs] = findpeaks(abs(Z_comp));
-f_res10 = f(locs(1:10));
+f_res10 = f(locs(1:10))';
 
 %% POINT E - Inharmonicity
 
