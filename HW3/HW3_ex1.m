@@ -94,12 +94,14 @@ e11 = 1/(w(end)-w(1))*int;
 [pks11, locs11] = findpeaks(abs(Zin2));
 [pks21, locs21] = findpeaks(abs(Zin_anal));
 
-figure
-plot(f, db(abs(Zin2)), LineWidth=1.2)
-grid minor
-figure
-plot(f, db(abs(Zin_anal)), LineWidth=1.2)
-grid minor
+h1 = figure('Renderer', 'painters', 'Position', [100 100 1000 500]);
+FRF_Plot('Zin', Zin2, f, max(f), h1)
+% plot(f, db(abs(Zin2)), LineWidth=1.2)
+% grid minor
+h2 = figure('Renderer', 'painters', 'Position', [100 100 1000 500]);
+FRF_Plot('Zin_{an}', Zin_anal, f, max(f), h2)
+% plot(f, db(abs(Zin_anal)), LineWidth=1.2)
+% grid minor
 
 %%
 
@@ -117,16 +119,18 @@ num = Zin2.*cos(k*L1) + 1i*Z0.*sin(k*L1);
 den = 1i*Zin2.*sin(k*L1) + Z0.*cos(k*L1);
 Z_comp = Z0.*num./den;
 
-% close all;
-figure;
-plot(f, db(abs(Z_comp)));
-grid minor
+% close all
+jj = figure;
+% plot(f, db(abs(Z_comp)), line);
+FRF_Plot('Z', Z_comp, f, 2000, jj)
+
 
 [pks, locs] = findpeaks(abs(Z_comp));
 f_res10 = f(locs(1:10));
 
 %% POINT E - Inharmonicity
 
+% close all
 inh_exp = f(locs10);
 inh_exp2 = f(locs11);
 inh_exp = inh_exp./inh_exp(1)./(1:length(inh_exp));
@@ -142,7 +146,7 @@ disp(inh_exp)
 disp("Compound Horn inharmonicity")
 disp(inh_comp);
 
-figure
+figure('Renderer', 'painters', 'Position', [100 100 1000 500])
 plot(inh_exp, '-o', LineWidth=1.2)
 hold on
 plot(inh_exp2, '-o', LineWidth=1.2)
@@ -151,7 +155,7 @@ plot(inh_comp, '-o', LineWidth=1.2)
 hold on 
 plot(1:10, ones(1,10), '-o' ,LineWidth=0.8)
 grid
-legend("horn", "horn w/ load", "compound horn", "perfect harmonicity")
+legend(["horn", "horn w/ load", "compound horn", "perfect harmonicity"], 'Position', [0.717914508303892,0.536260275699164,0.172624437129336,0.142886516294981])
 xlabel('# of harmonic'); ylabel('harmonicity')
 
 

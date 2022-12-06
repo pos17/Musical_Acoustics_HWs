@@ -8,7 +8,7 @@
 % Donà Stefano                                                            %
 % 2022                                                                    %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-clear all;
+clear;
 close all;
 clc;
 
@@ -16,109 +16,100 @@ addpath('Functions')
 simulink_folder = './PreviousVersion/';       % Simulink projects folder
 addpath(simulink_folder);
 
+if not(isfolder("plots\"))
+    mkdir("plots\")
+end
+
 %% Setup
 fs = 48000;                         % Sampling frequency
 signalLen = 5;                      % Signal length
 % t = [0:1/fs:signalLen-1/fs];        % Time axis
-t = linspace(0, signalLen, (signalLen*fs)+1);
+t = linspace(0, signalLen, (signalLen*fs));
 
-fileName = 'GuitarModel.wav';     % Audio file path
-
-
-%% Simulation
+%% SIMULATION OF IMPULSE RESPONSE
 % run the simulink simulation using the command sim (see doc sim).
-flag = 0;
+flag = 0; % commutation of switch to the impulse excitation
 sim('GuitarModel2'); 
-%%
+
+%% PLOTTING OF THE ADMITTANCE OF THE GUITAR BODY
 
 % The variable I contains non constant time intervals between samples.
 % Resample the data using resample function in order to obtain an equally
 % sampled signal I1
-% I1 = resample(I, t);
+I = resample(I_out, t);
+V = resample(V_out, t);
 
-figure();
-plot(I.Time, I.Data);
-close all
 H = fft(I.Data)./fft(V.Data);
 H = H(1:floor(length(H)/2));
 
 frq = linspace(0,fs/2, length(H));
 
-% g = figure();
 g = figure('Renderer', 'painters', 'Position', [100 100 1000 600]);
-FRF_Plot('H', H, frq, g);
+FRF_Plot('H', H, frq, 2000, g);
 sgtitle("Admittance of the Guitar Body ")
+% saving plot
+delete(".\plots\GTR_Ex1_Admittance.png");
+saveas(gcf, ".\plots\GTR_Ex1_Admittance.png");
 
 
 [pks, locs] = findpeaks(abs(H));
-
 resonances = frq(locs)';
-clc
+
 disp("resonances of the system");
 disp(resonances);
-% %%
-% close all
-% figure(15)
-% bode(H)
-% 
-% V1 = resample(V, t);
-%%
-% Plot the resampled signal in time
-flag = 2;
+
+
+%% SIMULATION OF HARMONIC EXCITATION
+flag = 2; % commutation of the switch to the damped squared signal
 sim('GuitarModel2'); 
-%%
-close all
+I = resample(I_out, t);
+V = resample(V_out, t);
+
+%% PLOTTING THE 
+
 figure('Renderer', 'painters', 'Position', [100 100 1000 600])
 plot(I.Time, I.Data);
 grid minor
 xlabel('time [s]'); ylabel('current [A]');
 title('Velocity of top plate');
-
+% saving plot
+delete(".\plots\GTR_Ex1_VelTime.png");
+saveas(gcf, ".\plots\GTR_Ex1_VelTime.png");
 
 figure('Renderer', 'painters', 'Position', [100 100 1000 600])
-plot(V.Time, V.Data);
-
-% Normalize the signal
-soundWave = I.data;
-soundWave = soundWave./max(abs(soundWave));
+plot(I.Time, I.Data);
+grid minor
+xlabel('time [s]'); ylabel('current [A]');
+title('Velocity of top plate zoomed');
+xlim([0 0.1])
+% saving plot
+delete(".\plots\GTR_Ex1_VelTimeZoomed.png");
+saveas(gcf, ".\plots\GTR_Ex1_VelTimeZoomed.png");
 
 %% Plot and play
 % Plot the signal frequency content as magnitude and phase
-% [S, magS, angleS, f, df] = myFFT(soundWave, fs);
-% [V_f, magV, angleV, f, df] = myFFT(V1.data, fs);
-
-close all
-h = figure('Renderer', 'painters', 'Position', [100 100 1000 600]);
 S = fft(I.Data);
 S = S(1:floor(length(S)/2));
 
-FRF_Plot(' . ', H, frq, h);
+h = figure('Renderer', 'painters', 'Position', [100 100 1000 600]);
+
+FRF_Plot('', H, frq, 2000, h);
 hold on
-FRF_Plot('' ,S, frq, h);
-legend("admittance", "top plate vel")
+FRF_Plot(' . ' , S, frq, 2000, h);
+legend(["admittance", "top plate vel"], Position=[0.790099999227524,0.47358333269755,0.115800001544952,0.060833334604899])
 sgtitle("Top Plate Velocity vs Admittance")
-
-% j = figure('Renderer', 'painters', 'Position', [100 100 1000 600]);
-% F = fft(V.Data);
-% F = F(1:floor(length(F)/2));
-% 
-% FRF_Plot('Force' ,F, frq, j);
-% sgtitle("Frequency response of the exciter force")
+% saving plot
+delete(".\plots\GTR_Ex1_AdmVSVel.png");
+saveas(gcf, ".\plots\GTR_Ex1_AdmVSVel.png");
 
 
-% plotFFT_linearFreqScale(magS, angleS, f, df, fs, fs/4, h);
-% g = figure('Renderer', 'painters', 'Position', [100 100 1000 600]);
-% plotFFT_linearFreqScale(magV, angleV, f, df, fs, fs/4, g);
+%% LISTENING AND SAVING SOUNDWAVE
 
-% j = figure('Renderer', 'painters', 'Position', [100 100 1000 600]);
-% plotFFT_linearFreqScale(magS./magV, angleS-angleV, f, df, fs, fs/4, j);
+fileName = 'GuitarModelNoString.wav';     % Audio file path
 
-
-
-%%
-figure(3);
-plot(t, soundWave);
-title('Signal in time'), xlabel('Time [s]')
+% Normalize the signal
+soundWave = I.Data;
+soundWave = soundWave./max(abs(soundWave));
 
 sound(soundWave, fs);                           % Play the sound
 
@@ -126,58 +117,60 @@ disp('Save file on disk...')                    % Save on disk
 audiowrite(fileName, soundWave, fs);
 
 
-% H = abs(S./V_f);
-% g = figure();
-% plotFFT_linearFreqScale(H, angle(S./V_f), f, df, fs, 2000, g);
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                         %
+%                   SIMULATION OF BODY AND REAL STRING                    %
+%                                                                         %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-%% Body and string 
-
-fileName = 'GuitarModelString.wav';
-
-%% Simulation
+%% Body and string Simulation
 % run the simulink simulation using the command sim (see doc sim).
 sim('GuitarModel3'); 
 
 % The variable I contains non constant time intervals between samples.
 % Resample the data using resample function in order to obtain an equally
-% sampled signal I1
+% sampled signal I_2
 
 I2 = resample(I_2, t);
-% I2 = I_2;
 
 % Plot the resampled signal in time
-% figure(4)
-% plot(I2);
-% figure(12)
-% spectrogram(I_2.Data, hamming(128), 64);
+figure('Renderer', 'painters', 'Position', [100 100 1000 600]);
+plot(I2);
+xlabel('time [s]'); ylabel('current [A]')
+title('Velocity of top plate w/ string model')
+grid minor
+% saving plot
+delete(".\plots\GTR_Ex2_VelTime.png");
+saveas(gcf, ".\plots\GTR_Ex2_VelTime.png");
 
 % Normalize the signal 
-
-soundWave2 = I2.data;
+soundWave2 = I2.Data;
 soundWave2 = soundWave2./max(abs(soundWave2));
+%% PLOTTING FFT
 
-%% Plot and play
 % Plot the signal frequency content as magnitude and phase
 S = fft(I2.Data); 
 S = S(1:floor(length(S)/2));
 jj = figure('Renderer', 'painters', 'Position', [100 100 1000 600]);
 frq = linspace(0,fs/2, length(S));
-FRF_Plot('S', S, frq, jj)
+FRF_Plot('Vel', S, frq, 5500, jj)
+sgtitle('Frequency response of the velocity w/ string model')
+allAxis=get(gcf, 'Children');
 
-figure();
-plot(t, I2.Data);
-title('Top Plate Velocity Signal');
-xlabel('Time [s]'); ylabel('Current [A]');
-grid minor
-%%
-close all
-figure()
-spectrogram(soundWave2, blackman(2048), 64, 1024, fs, 'psd');
-xlim([0, 5]);
-%% PRINTING FILE
+f0 = 329.5;
+xline(f0, 'k--', 'LineWidth', 2,'Parent', allAxis(3));
+xline([f0*5 f0*10 f0*15], 'r--', 'LineWidth', 2,'Parent', allAxis(3));
+
+% saving plot
+delete(".\plots\GTR_Ex2_VelFreq.png");
+saveas(gcf, ".\plots\GTR_Ex2_VelFreq.png");
+
+%% LISTENING AND PRINTING FILE
+
+fileName = 'GuitarModelString.wav';
 
 sound(soundWave2, fs);                          % Play the sound
-%%
+
 disp('Save file on disk...')                    % Save on disk
 audiowrite(fileName, soundWave2, fs);
