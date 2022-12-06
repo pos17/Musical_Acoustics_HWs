@@ -8,6 +8,21 @@
 % Donà Stefano                                                            %
 % 2022                                                                    %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% NOTES:
+% in this file we didn't use the functions myFFT() and 
+% plotFFT_linearFreqScale() because we noticed that the fft returned by the
+% first function wasn't smooth enough in order to collect qualitative and
+% quantitave informations from it. Instead, the built-in fft of MATLAB gave
+% us the smoothness we needed. Moreover, given the high differences in
+% terms of order of magnintude of the different peaks we built our own
+% function FRF_Plot that is an easier modification of the second given
+% function, and it plots the magnitude in dB scale in order to understand
+% better the behavior of the system.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 clear;
 close all;
 clc;
@@ -20,16 +35,18 @@ if not(isfolder("plots\"))
     mkdir("plots\")
 end
 
+
 %% Setup
 fs = 48000;                         % Sampling frequency
-signalLen = 5;                      % Signal length
-% t = [0:1/fs:signalLen-1/fs];        % Time axis
-t = linspace(0, signalLen, (signalLen*fs));
+signalLen = 5;                      % Signal length    
+t = linspace(0, signalLen, (signalLen*fs));  % Time axis
+
 
 %% SIMULATION OF IMPULSE RESPONSE
 % run the simulink simulation using the command sim (see doc sim).
 flag = 0; % commutation of switch to the impulse excitation
 sim('GuitarModel2'); 
+
 
 %% PLOTTING OF THE ADMITTANCE OF THE GUITAR BODY
 
@@ -48,7 +65,6 @@ g = figure('Renderer', 'painters', 'Position', [100 100 1000 600]);
 FRF_Plot('H', H, frq, 2000, g);
 sgtitle("Admittance of the Guitar Body ")
 % saving plot
-delete(".\plots\GTR_Ex1_Admittance.png");
 saveas(gcf, ".\plots\GTR_Ex1_Admittance.png");
 
 
@@ -63,7 +79,7 @@ disp(resonances);
 flag = 2; % commutation of the switch to the damped squared signal
 sim('GuitarModel2'); 
 I = resample(I_out, t);
-V = resample(V_out, t);
+
 
 %% PLOTTING THE 
 
@@ -73,7 +89,6 @@ grid minor
 xlabel('time [s]'); ylabel('current [A]');
 title('Velocity of top plate');
 % saving plot
-delete(".\plots\GTR_Ex1_VelTime.png");
 saveas(gcf, ".\plots\GTR_Ex1_VelTime.png");
 
 figure('Renderer', 'painters', 'Position', [100 100 1000 600])
@@ -83,8 +98,8 @@ xlabel('time [s]'); ylabel('current [A]');
 title('Velocity of top plate zoomed');
 xlim([0 0.1])
 % saving plot
-delete(".\plots\GTR_Ex1_VelTimeZoomed.png");
 saveas(gcf, ".\plots\GTR_Ex1_VelTimeZoomed.png");
+
 
 %% Plot and play
 % Plot the signal frequency content as magnitude and phase
@@ -99,7 +114,6 @@ FRF_Plot(' . ' , S, frq, 2000, h);
 legend(["admittance", "top plate vel"], Position=[0.790099999227524,0.47358333269755,0.115800001544952,0.060833334604899])
 sgtitle("Top Plate Velocity vs Admittance")
 % saving plot
-delete(".\plots\GTR_Ex1_AdmVSVel.png");
 saveas(gcf, ".\plots\GTR_Ex1_AdmVSVel.png");
 
 
@@ -141,12 +155,13 @@ xlabel('time [s]'); ylabel('current [A]')
 title('Velocity of top plate w/ string model')
 grid minor
 % saving plot
-delete(".\plots\GTR_Ex2_VelTime.png");
 saveas(gcf, ".\plots\GTR_Ex2_VelTime.png");
 
 % Normalize the signal 
 soundWave2 = I2.Data;
 soundWave2 = soundWave2./max(abs(soundWave2));
+
+
 %% PLOTTING FFT
 
 % Plot the signal frequency content as magnitude and phase
@@ -163,8 +178,8 @@ xline(f0, 'k--', 'LineWidth', 2,'Parent', allAxis(3));
 xline([f0*5 f0*10 f0*15], 'r--', 'LineWidth', 2,'Parent', allAxis(3));
 
 % saving plot
-delete(".\plots\GTR_Ex2_VelFreq.png");
 saveas(gcf, ".\plots\GTR_Ex2_VelFreq.png");
+
 
 %% LISTENING AND PRINTING FILE
 
