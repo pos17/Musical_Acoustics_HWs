@@ -18,7 +18,7 @@ x1 = r1/tan(alpha);
 x2 = r2/tan(alpha);
 S1 = r1.^2*pi;
 S2 = r2.^2*pi;
-deltaL = r1*0.6;
+deltaL = r1*0.85;
 Lp = L+deltaL;
 theta1 = atan(k0*x1);
 theta2 = atan(k0*x2);
@@ -31,6 +31,7 @@ Zindb = db(Zin);
 figure()
 plot(r1, Zindb, LineWidth=1.4)
 grid minor
+xlabel('r_f [m]'); ylabel('|Z_{in}| [dB]')
 
 r1 = r1(Zindb == min(Zindb));
 r2 = r1+L*tan(alpha);
@@ -53,8 +54,8 @@ theta2 = atan(k1*x2);
 
 M = tan(k1*0.6*r2)*rho./S2./k1;
 
-D = linspace(0, L, 1000);
-delta = D + deltaL.^2./(D+2*deltaL);
+D1 = linspace(0, L, 1000);
+delta = D1 + deltaL.^2./(D1+2*deltaL);
 
 Lpp = Lp-delta;
 
@@ -62,12 +63,12 @@ Zin = 1i*w1*M + 1i*rho*c/S2 .* sin(k1*Lpp).*sin(theta2) ./ sin(k1*Lpp+theta2);
 Zindb = db(Zin);
 
 figure()
-plot(D, Zindb, LineWidth=1.4)
+plot(D1, Zindb, LineWidth=1.4)
 grid minor
 
-hole3_coord = L-D(Zindb == min(Zindb));
-D = D(Zindb == min(Zindb));
-Lpp = Lp - (D + deltaL.^2./(D+2*deltaL));
+hole3_coord = L-D1(Zindb == min(Zindb));
+D1 = D1(Zindb == min(Zindb));
+Lpp = Lp - (D1 + deltaL.^2./(D1+2*deltaL));
 
 %% PUNTO C
 
@@ -89,6 +90,34 @@ grid minor
 
 hole4_coord = Lpp-D2(Zindb == min(Zindb));
 D2 = D2(Zindb == min(Zindb));
-Lppp = Lpp - (D + deltaL.^2./(D+2*deltaL));
+Lppp = Lpp - (D2 - (D2*deltaL)./(D2+deltaL));
+
+%% shape plot
+
+x = linspace(0, L, 1000);
+shape = r2-x*tan(alpha);
+hole1 = linspace(hole3_coord-r1, hole3_coord+r1, 10);
+hole2 = linspace(hole4_coord-r1, hole4_coord+r1, 10);
+
+r3 = (L-hole3_coord+x1)*tan(alpha);
+r4 = (L-hole4_coord+x1)*tan(alpha);
+
+
+figure()
+plot(x, shape, 'k', LineWidth=1.4);
+hold on
+plot(x, -shape, 'k', LineWidth=1.4);
+hold on
+yline(0, 'k--')
+hold on 
+xline(hole3_coord, 'b--');
+hold on 
+xline(hole4_coord, 'b--');
+hold on
+plot(hole1, ones(length(hole1), 1)*r3, LineWidth=5);
+hold on
+plot(hole2, ones(length(hole2), 1)*r4, LineWidth=5);
+grid minor
+ylim([-0.2 0.2])
 
 
