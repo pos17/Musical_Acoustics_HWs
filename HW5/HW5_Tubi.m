@@ -28,15 +28,22 @@ M = tan(k0*0.6*r2)*rho./k0./S2;
 Zin = 1i*rho*c./S2 .* sin(k0*Lp) .* sin(theta2) ./ sin(k0*Lp+theta2) + 1i*w0*M;
 Zindb = db(Zin);
 
-figure()
-plot(r1, Zindb, LineWidth=1.4)
-grid minor
-xlabel('r_f [m]'); ylabel('|Z_{in}| [dB]')
-
 r1 = r1(Zindb == min(Zindb));
 r2 = r1+L*tan(alpha);
 deltaL = r1*0.6;
 Lp = L+deltaL;
+
+
+figure('Renderer', 'painters', 'Position', [100 100 1000 600]);
+plot(r1, Zindb, LineWidth=1.4)
+grid minor
+xlabel('r_f [m]'); ylabel('|Z_{in}| [dB]')
+title("Inharmonicity of the systems")
+filename='Ex2E_inharmonicity';
+saveas(gcf, [".\plots\"+filename+".png"]);
+
+
+
 
 %% PUNTO B
 
