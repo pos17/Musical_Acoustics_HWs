@@ -16,7 +16,7 @@ x1 = r1/tan(alpha);
 x2 = r2/tan(alpha);
 S1 = r1.^2*pi;
 S2 = r2.^2*pi;
-Lp = L+r1*0.6;
+Lp = L+r1*0.85;
 theta1 = atan(k0*x1);
 theta2 = atan(k0*x2);
 
@@ -62,7 +62,7 @@ theta3 = atan(k1*x3);
 
 L23 = x2-x3;
 L31 = x3-x1;
-L31p = L31+0.6*r1;
+L31p = L31+0.85*r1;
 % L31p = L31;
 % l = r3+0.85*r1;
 l = 0.6*r1;
@@ -116,10 +116,10 @@ theta4 = atan(k2*x4);
 L43 = x4-x3;
 L31 = x3-x1;
 L24 = x2-x4;
-L31p = L31+0.6*r1;
+L31p = L31+0.85*r1;
 % l3 = r3+0.85*r1;
 % l4 = r4+0.85*r1;
-l3 = 0.6*r1;
+l3 = 0.85*r1;
 l4 = l3;
 
 M = tan(k2*0.6*r2)*rho./S2./k2;
