@@ -23,7 +23,8 @@ Lp = L+deltaL;
 theta1 = atan(k0*x1);
 theta2 = atan(k0*x2);
 
-M = tan(k0*0.6*r2)*rho./k0./S2;
+% M = tan(k0*0.6*r2)*rho./k0./S2;
+M = 0.04*rho./S2;
 
 % Zin = 1i*rho*c./S2 .* sin(k0*Lp) .* sin(theta2) ./ sin(k0*Lp+theta2) + 1i*w0*M;
 Zin = 1i*rho*c./S2 .* sin(k0*Lp) .* sin(theta1) ./ sin(k0*Lp+theta1) + 1i*w0*M;
@@ -53,7 +54,8 @@ S2 = r2^2*pi;
 theta1 = atan(k1*x1);
 theta2 = atan(k1*x2);
 
-M = tan(k1*0.6*r2)*rho./S2./k1;
+% M = tan(k1*0.6*r2)*rho./S2./k1;
+% M = 0.04*rho./S2;
 
 D1 = linspace(0, L, 1000);
 delta = D1 + deltaL.^2./(D1+2*deltaL);
@@ -83,6 +85,7 @@ D2 = linspace(0, Lpp, 1000);
 delta2 = D2 - (D2*deltaL)./(D2+deltaL);
 
 Lppp = Lpp-delta2;
+% M = tan(k2*0.6*r2)*rho./S2./k2;
 
 % Zin = 1i*w2*M + 1i*rho*c/S2 .* sin(k2*Lppp).*sin(theta2) ./ sin(k2*Lppp+theta2);
 Zin = 1i*w2*M + 1i*rho*c/S2 .* sin(k2*Lppp).*sin(theta1) ./ sin(k2*Lppp+theta1);
