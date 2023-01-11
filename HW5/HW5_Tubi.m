@@ -23,9 +23,11 @@ Lp = L+deltaL;
 theta1 = atan(k0*x1);
 theta2 = atan(k0*x2);
 
-M = tan(k0*0.6*r2)*rho./k0./S2;
+% M = tan(k0*0.6*r2)*rho./k0./S2;
+M = 0.04*rho./S2;
 
-Zin = 1i*rho*c./S2 .* sin(k0*Lp) .* sin(theta2) ./ sin(k0*Lp+theta2) + 1i*w0*M;
+% Zin = 1i*rho*c./S2 .* sin(k0*Lp) .* sin(theta2) ./ sin(k0*Lp+theta2) + 1i*w0*M;
+Zin = 1i*rho*c./S2 .* sin(k0*Lp) .* sin(theta1) ./ sin(k0*Lp+theta1) + 1i*w0*M;
 Zindb = db(Zin);
 
 r1 = r1(Zindb == min(Zindb));
@@ -59,19 +61,22 @@ S2 = r2^2*pi;
 theta1 = atan(k1*x1);
 theta2 = atan(k1*x2);
 
-M = tan(k1*0.6*r2)*rho./S2./k1;
+% M = tan(k1*0.6*r2)*rho./S2./k1;
+% M = 0.04*rho./S2;
 
 D1 = linspace(0, L, 1000);
 delta = D1 + deltaL.^2./(D1+2*deltaL);
 
 Lpp = Lp-delta;
 
-Zin = 1i*w1*M + 1i*rho*c/S2 .* sin(k1*Lpp).*sin(theta2) ./ sin(k1*Lpp+theta2);
+% Zin = 1i*w1*M + 1i*rho*c/S2 .* sin(k1*Lpp).*sin(theta2) ./ sin(k1*Lpp+theta2);
+Zin = 1i*w1*M + 1i*rho*c/S2 .* sin(k1*Lpp).*sin(theta1) ./ sin(k1*Lpp+theta1);
 Zindb = db(Zin);
 
 figure()
 plot(D1, Zindb, LineWidth=1.4)
 grid minor
+xlabel('D_1 [m]'); ylabel('|Z_{in}| [dB]')
 
 hole3_coord = L-D1(Zindb == min(Zindb));
 D1 = D1(Zindb == min(Zindb));
@@ -87,13 +92,16 @@ D2 = linspace(0, Lpp, 1000);
 delta2 = D2 - (D2*deltaL)./(D2+deltaL);
 
 Lppp = Lpp-delta2;
+% M = tan(k2*0.6*r2)*rho./S2./k2;
 
-Zin = 1i*w2*M + 1i*rho*c/S2 .* sin(k2*Lppp).*sin(theta2) ./ sin(k2*Lppp+theta2);
+% Zin = 1i*w2*M + 1i*rho*c/S2 .* sin(k2*Lppp).*sin(theta2) ./ sin(k2*Lppp+theta2);
+Zin = 1i*w2*M + 1i*rho*c/S2 .* sin(k2*Lppp).*sin(theta1) ./ sin(k2*Lppp+theta1);
 Zindb = db(Zin);
 
 figure()
 plot(D2, Zindb, LineWidth=1.4)
 grid minor
+xlabel('D_2 [m]'); ylabel('|Z_{in}| [dB]')
 
 hole4_coord = Lpp-D2(Zindb == min(Zindb));
 D2 = D2(Zindb == min(Zindb));
