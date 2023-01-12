@@ -36,8 +36,6 @@ M = 0.04*rho./S2;
 Zin = 1i*rho*c./S2 .* sin(k0*Lp) .* sin(theta1) ./ sin(k0*Lp+theta1) + 1i*w0*M;
 Zindb = db(Zin);
 
-<<<<<<< HEAD
-=======
 % figure()
 % plot(r1, Zindb, LineWidth=1.4)
 % grid minor
@@ -48,7 +46,6 @@ figure('Renderer', 'painters', 'Position', [100 100 1000 600]);%, 'OuterPosition
 plot(r1, Zindb, LineWidth=1.4)
 hold on
 
->>>>>>> 73484d74d2147e26cd0bb45bddac21b82c2fa0b9
 r1 = r1(Zindb == min(Zindb));
 xline(r1, 'k--', LineWidth=1.4)
 text(r1*1.03, min(Zindb)/1.1, ["$r_1=$"+num2str(r1)+" m"], Interpreter="latex", FontSize=14)
