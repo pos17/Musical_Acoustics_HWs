@@ -30,21 +30,25 @@ M = 0.04*rho./S2;
 Zin = 1i*rho*c./S2 .* sin(k0*Lp) .* sin(theta1) ./ sin(k0*Lp+theta1) + 1i*w0*M;
 Zindb = db(Zin);
 
+r1_chos = r1(Zindb == min(Zindb))
+r2_chos = r1_chos+L*tan(alpha)
+
+figure('Renderer', 'painters', 'Position', [100 100 1000 600]);
+plot(r1, Zindb, LineWidth=1.4)
+hold on
+xline(r1_chos)
+hold on 
+text(r1_chos+0.001, 120, strcat('r_1 = ',num2str(r1_chos), " m"),'FontSize',11);
+grid minor
+xlabel('r_f [m]','interpreter','latex'); ylabel('|Z_{in}| [dB]','interpreter','latex')
+title("Input impedance function of $r_1$",'interpreter','latex','FontSize',25)
+filename='ZindB_r1';
+saveas(gcf, [".\plots\"+filename+".png"]);
+
 r1 = r1(Zindb == min(Zindb));
 r2 = r1+L*tan(alpha);
 deltaL = r1*0.6;
 Lp = L+deltaL;
-
-
-figure('Renderer', 'painters', 'Position', [100 100 1000 600]);
-plot(r1, Zindb, LineWidth=1.4)
-grid minor
-xlabel('r_f [m]'); ylabel('|Z_{in}| [dB]')
-title("Inharmonicity of the systems")
-filename='Ex2E_inharmonicity';
-saveas(gcf, [".\plots\"+filename+".png"]);
-
-
 
 
 %% PUNTO B
