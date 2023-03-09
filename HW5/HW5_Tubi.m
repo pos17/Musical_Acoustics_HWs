@@ -7,7 +7,7 @@ if not(isfolder("plots"))
 end
 
 % L = 0.4673; % m
-L = 0.45;
+L = 0.47;
 alpha = deg2rad(0.75); % rad
 c = 343; % m/s
 rho = 1.225; % kg/m3
@@ -187,23 +187,53 @@ hole2 = linspace(hole4_coord-r1, hole4_coord+r1, 10);
 
 r3 = (L-hole3_coord+x1)*tan(alpha);
 r4 = (L-hole4_coord+x1)*tan(alpha);
+wh = floor(r1/(x(2)-x(1)));
 
 
-figure()
-plot(x, shape, 'k', LineWidth=1.4);
+figure('Renderer', 'painters', 'Position', [100 100 1000 600]);
+plot(x, -shape, 'k', LineWidth=2.4);
 hold on
-plot(x, -shape, 'k', LineWidth=1.4);
+
+ind1 = find(x == hole3_coord);
+shape(ind1-wh: ind1+wh) = nan;
+ind2 = find(abs(x-hole4_coord)<0.0002);
+shape(ind2-wh: ind2+wh) = nan;
+plot(x, shape, 'k', LineWidth=2.4);
 hold on
-yline(0, 'k--')
+yline(0, 'k--', LineWidth=1)
 hold on 
-xline(hole3_coord, 'b--');
+xline(hole3_coord, 'b--', LineWidth=1);
 hold on 
-xline(hole4_coord, 'b--');
+xline(hole4_coord, 'b--', LineWidth=1);
+
 hold on
-plot(hole1, ones(length(hole1), 1)*r3, LineWidth=5);
+plot(hole1, ones(length(hole1), 1)*r3, Color='#0072BD', LineWidth=6);
 hold on
-plot(hole2, ones(length(hole2), 1)*r4, LineWidth=5);
+plot(hole2, ones(length(hole2), 1)*r4, 	Color='#D95319',  LineWidth=6);
 grid minor
 ylim([-0.2 0.2])
+xlim([0, L])
+
+
+xlabel("$x [m]$", Interpreter="latex", FontSize=20);
+% xlabel("$x [m]$", Interpreter="latex", FontSize=14);
+title("Shape of the complete resonator", Interpreter="latex", FontSize=20)
+% text(hole4_coord, r4*1.5, "$H_2$", Interpreter="latex", FontSize=14)
+% text(hole3_coord, r3*1.5, "$H_1$", Interpreter="latex", FontSize=14)
+text(hole4_coord, r4*2, "$H_2$", Interpreter="latex", FontSize=14)
+text(hole3_coord, r3*2, "$H_1$", Interpreter="latex", FontSize=14)
+% MAX SIZE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ax = gca;
+outerpos = ax.OuterPosition;
+ti = ax.TightInset; 
+left = outerpos(1) + ti(1);
+bottom = outerpos(2) + ti(2);
+ax_width = outerpos(3) - ti(1) - ti(3);
+ax_height = outerpos(4) - ti(2) - ti(4);
+ax.Position = [left bottom ax_width ax_height];
+% MAX SIZE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% saveas(gcf, './plots/Shape.png');
+saveas(gcf, './plots/Shape48cm.png');
 
 
