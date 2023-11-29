@@ -14,4 +14,4 @@ The model is made exploiting Electromechanoacoustical circuit equivalents. The i
 - **HL4**: The fourth homelab is about the study of [brass instrument simulation](./HL4/Consegna_HL4_OstanDon%C3%A0%202/Musical_Acoustics_HL4-2.pdf). The study considers a COMSOL acoustic simulation of a trumpet.
 ## Group members
 - Paolo Ostan (paolo.ostan@mail.polimi.it, paos9904@gmail.com)
-- Stefano Donà (stefano.dona@mail.polimi.it, albertodoimo1@gmail.com)
+- Stefano Donà (stefano2.dona@mail.polimi.it, stefanodona13@gmail.com)
