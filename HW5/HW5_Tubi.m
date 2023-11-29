@@ -54,6 +54,7 @@ grid minor
 xlabel("$r_1\ [m]$", Interpreter='latex', FontSize=20); 
 ylabel("$|Z_{in}|\ [dB]$", Interpreter='latex', FontSize=20)
 title("Input impedance as function of $r_1$", Interpreter="latex", FontSize=25)
+saveas(gcf, './plots/ImpedanceR1.png');
 
 % MAX SIZE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ax = gca;
@@ -66,7 +67,6 @@ ax_height = outerpos(4) - ti(2) - ti(4);
 ax.Position = [left bottom ax_width ax_height];
 % MAX SIZE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-saveas(gcf, './plots/ImpedanceR1.png');
 
 % r1 = r1(Zindb == min(Zindb));
 r2 = r1+L*tan(alpha);
@@ -74,22 +74,22 @@ deltaL = r1*0.85;
 Lp = L+deltaL;
 
 
-figure('Renderer', 'painters', 'Position', [100 100 1000 600]);
-plot(r1, Zindb, LineWidth=1.4)
-hold on
-xline(r1_chos)
-hold on 
-text(r1_chos+0.001, 120, strcat('r_1 = ',num2str(r1_chos), " m"),'FontSize',11);
-grid minor
-xlabel('r_f [m]','interpreter','latex'); ylabel('|Z_{in}| [dB]','interpreter','latex')
-title("Input impedance function of $r_1$",'interpreter','latex','FontSize',25)
-filename='ZindB_r1';
-saveas(gcf, [".\plots\"+filename+".png"]);
+%figure('Renderer', 'painters', 'Position', [100 100 1000 600]);
+%plot(r1, Zindb, LineWidth=1.4)
+%hold on
+%xline(r1_chos)
+%hold on 
+%text(r1_chos+0.001, 120, strcat('r_1 = ',num2str(r1_chos), " m"),'FontSize',11);
+%grid minor
+%xlabel('r_f [m]','interpreter','latex'); ylabel('|Z_{in}| [dB]','interpreter','latex')
+%title("Input impedance function of $r_1$",'interpreter','latex','FontSize',25)
+%filename='ZindB_r1';
+%saveas(gcf, [".\plots\"+filename+".png"]);
 
-r1 = r1(Zindb == min(Zindb));
-r2 = r1+L*tan(alpha);
-deltaL = r1*0.6;
-Lp = L+deltaL;
+%r1 = r1(Zindb == min(Zindb));
+%r2 = r1+L*tan(alpha);
+%deltaL = r1*0.6;
+%Lp = L+deltaL;
 
 
 %% PUNTO B
